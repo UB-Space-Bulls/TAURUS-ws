@@ -1,0 +1,58 @@
+solid terrain
+facet normal -0.258819045 0 0.965925826
+outer loop
+vertex 1.2 1.2 0
+vertex 5.2 1.2 1.07179677
+vertex 5.2 3.6 1.07179677
+endloop
+endfacet
+facet normal -0.258819045 0 0.965925826
+outer loop
+vertex 1.2 1.2 0
+vertex 5.2 3.6 1.07179677
+vertex 1.2 3.6 0
+endloop
+endfacet
+facet normal 0 -1 0
+outer loop
+vertex 1.2 1.2 0
+vertex 5.2 1.2 0
+vertex 5.2 1.2 1.07179677
+endloop
+endfacet
+facet normal 0 1 0
+outer loop
+vertex 1.2 3.6 0
+vertex 5.2 3.6 1.07179677
+vertex 5.2 3.6 0
+endloop
+endfacet
+facet normal 1 0 0
+outer loop
+vertex 5.2 1.2 0
+vertex 5.2 3.6 0
+vertex 5.2 3.6 1.07179677
+endloop
+endfacet
+facet normal 1 0 0
+outer loop
+vertex 5.2 1.2 0
+vertex 5.2 3.6 1.07179677
+vertex 5.2 1.2 1.07179677
+endloop
+endfacet
+facet normal 0 0 -1
+outer loop
+vertex 1.2 1.2 0
+vertex 1.2 3.6 0
+vertex 5.2 3.6 0
+endloop
+endfacet
+facet normal 0 0 -1
+outer loop
+vertex 1.2 1.2 0
+vertex 5.2 3.6 0
+vertex 5.2 1.2 0
+endloop
+endfacet
+endsolid terrain

@@ -1,0 +1,14 @@
+#!/usr/bin/env python3
+"""ROS executable; implementation is installed beside this file."""
+from pathlib import Path
+import sys
+
+# With --symlink-install Python resolves this script back into source/scripts.
+# A regular install puts the implementation beside the executable instead.
+source_root = Path(__file__).resolve().parents[1]
+if (source_root / 'terrain_geometry_impl').is_dir():
+    sys.path.insert(0, str(source_root))
+from terrain_geometry_impl.node import main
+
+if __name__ == '__main__':
+    main()

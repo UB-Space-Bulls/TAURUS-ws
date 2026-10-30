@@ -1,0 +1,337 @@
+{
+  "source": "live ROS topic /terrain/grid",
+  "distinct_snapshots": 20,
+  "passed": true,
+  "last_snapshots": [
+    {
+      "stamp_sec": 32,
+      "stamp_nanosec": 0,
+      "metrics": {
+        "flat": {
+          "known_cells": 70,
+          "region_cells": 70,
+          "slope_median_deg": 0.0842943862080574,
+          "roughness_median_m": 0.010449489578604698
+        },
+        "ramp": {
+          "known_cells": 19,
+          "region_cells": 24,
+          "slope_median_deg": 15.000767707824707,
+          "roughness_median_m": 0.014733400195837021
+        },
+        "rough": {
+          "known_cells": 22,
+          "region_cells": 45,
+          "slope_median_deg": 0.8526564240455627,
+          "roughness_median_m": 0.025608979165554047
+        },
+        "box_obstacle_cells": 10,
+        "unknown_cells": 1339
+      },
+      "checks": {
+        "flat_near_level": true,
+        "ramp_within_2_deg": true,
+        "rough_above_flat": true,
+        "raised_obstacle": true,
+        "unknown_preserved": true
+      }
+    },
+    {
+      "stamp_sec": 33,
+      "stamp_nanosec": 0,
+      "metrics": {
+        "flat": {
+          "known_cells": 70,
+          "region_cells": 70,
+          "slope_median_deg": 0.06806350499391556,
+          "roughness_median_m": 0.010408569127321243
+        },
+        "ramp": {
+          "known_cells": 19,
+          "region_cells": 24,
+          "slope_median_deg": 14.933128356933594,
+          "roughness_median_m": 0.015959743410348892
+        },
+        "rough": {
+          "known_cells": 24,
+          "region_cells": 45,
+          "slope_median_deg": 1.069193959236145,
+          "roughness_median_m": 0.025122925639152527
+        },
+        "box_obstacle_cells": 10,
+        "unknown_cells": 1326
+      },
+      "checks": {
+        "flat_near_level": true,
+        "ramp_within_2_deg": true,
+        "rough_above_flat": true,
+        "raised_obstacle": true,
+        "unknown_preserved": true
+      }
+    },
+    {
+      "stamp_sec": 34,
+      "stamp_nanosec": 0,
+      "metrics": {
+        "flat": {
+          "known_cells": 70,
+          "region_cells": 70,
+          "slope_median_deg": 0.08122772723436356,
+          "roughness_median_m": 0.01034550927579403
+        },
+        "ramp": {
+          "known_cells": 19,
+          "region_cells": 24,
+          "slope_median_deg": 15.012582778930664,
+          "roughness_median_m": 0.01350716408342123
+        },
+        "rough": {
+          "known_cells": 22,
+          "region_cells": 45,
+          "slope_median_deg": 0.9559034705162048,
+          "roughness_median_m": 0.026075592264533043
+        },
+        "box_obstacle_cells": 10,
+        "unknown_cells": 1339
+      },
+      "checks": {
+        "flat_near_level": true,
+        "ramp_within_2_deg": true,
+        "rough_above_flat": true,
+        "raised_obstacle": true,
+        "unknown_preserved": true
+      }
+    },
+    {
+      "stamp_sec": 35,
+      "stamp_nanosec": 0,
+      "metrics": {
+        "flat": {
+          "known_cells": 70,
+          "region_cells": 70,
+          "slope_median_deg": 0.09025299549102783,
+          "roughness_median_m": 0.009987253695726395
+        },
+        "ramp": {
+          "known_cells": 19,
+          "region_cells": 24,
+          "slope_median_deg": 15.058208465576172,
+          "roughness_median_m": 0.015604766085743904
+        },
+        "rough": {
+          "known_cells": 23,
+          "region_cells": 45,
+          "slope_median_deg": 1.0233120918273926,
+          "roughness_median_m": 0.02326442487537861
+        },
+        "box_obstacle_cells": 10,
+        "unknown_cells": 1336
+      },
+      "checks": {
+        "flat_near_level": true,
+        "ramp_within_2_deg": true,
+        "rough_above_flat": true,
+        "raised_obstacle": true,
+        "unknown_preserved": true
+      }
+    },
+    {
+      "stamp_sec": 36,
+      "stamp_nanosec": 0,
+      "metrics": {
+        "flat": {
+          "known_cells": 70,
+          "region_cells": 70,
+          "slope_median_deg": 0.07762297242879868,
+          "roughness_median_m": 0.010368147864937782
+        },
+        "ramp": {
+          "known_cells": 19,
+          "region_cells": 24,
+          "slope_median_deg": 14.996550559997559,
+          "roughness_median_m": 0.013018785044550896
+        },
+        "rough": {
+          "known_cells": 23,
+          "region_cells": 45,
+          "slope_median_deg": 0.8782647252082825,
+          "roughness_median_m": 0.024469543248414993
+        },
+        "box_obstacle_cells": 10,
+        "unknown_cells": 1338
+      },
+      "checks": {
+        "flat_near_level": true,
+        "ramp_within_2_deg": true,
+        "rough_above_flat": true,
+        "raised_obstacle": true,
+        "unknown_preserved": true
+      }
+    },
+    {
+      "stamp_sec": 37,
+      "stamp_nanosec": 0,
+      "metrics": {
+        "flat": {
+          "known_cells": 70,
+          "region_cells": 70,
+          "slope_median_deg": 0.0905986800789833,
+          "roughness_median_m": 0.010089917108416557
+        },
+        "ramp": {
+          "known_cells": 20,
+          "region_cells": 24,
+          "slope_median_deg": 14.995903015136719,
+          "roughness_median_m": 0.012811306864023209
+        },
+        "rough": {
+          "known_cells": 22,
+          "region_cells": 45,
+          "slope_median_deg": 0.9774097204208374,
+          "roughness_median_m": 0.02546190842986107
+        },
+        "box_obstacle_cells": 10,
+        "unknown_cells": 1337
+      },
+      "checks": {
+        "flat_near_level": true,
+        "ramp_within_2_deg": true,
+        "rough_above_flat": true,
+        "raised_obstacle": true,
+        "unknown_preserved": true
+      }
+    },
+    {
+      "stamp_sec": 38,
+      "stamp_nanosec": 0,
+      "metrics": {
+        "flat": {
+          "known_cells": 70,
+          "region_cells": 70,
+          "slope_median_deg": 0.07906143367290497,
+          "roughness_median_m": 0.009749643504619598
+        },
+        "ramp": {
+          "known_cells": 19,
+          "region_cells": 24,
+          "slope_median_deg": 14.973800659179688,
+          "roughness_median_m": 0.013039877638220787
+        },
+        "rough": {
+          "known_cells": 22,
+          "region_cells": 45,
+          "slope_median_deg": 1.182521939277649,
+          "roughness_median_m": 0.02657117322087288
+        },
+        "box_obstacle_cells": 10,
+        "unknown_cells": 1343
+      },
+      "checks": {
+        "flat_near_level": true,
+        "ramp_within_2_deg": true,
+        "rough_above_flat": true,
+        "raised_obstacle": true,
+        "unknown_preserved": true
+      }
+    },
+    {
+      "stamp_sec": 39,
+      "stamp_nanosec": 0,
+      "metrics": {
+        "flat": {
+          "known_cells": 70,
+          "region_cells": 70,
+          "slope_median_deg": 0.0841200202703476,
+          "roughness_median_m": 0.010227639228105545
+        },
+        "ramp": {
+          "known_cells": 20,
+          "region_cells": 24,
+          "slope_median_deg": 14.975215911865234,
+          "roughness_median_m": 0.014709558337926865
+        },
+        "rough": {
+          "known_cells": 22,
+          "region_cells": 45,
+          "slope_median_deg": 0.9524209499359131,
+          "roughness_median_m": 0.025834981352090836
+        },
+        "box_obstacle_cells": 10,
+        "unknown_cells": 1335
+      },
+      "checks": {
+        "flat_near_level": true,
+        "ramp_within_2_deg": true,
+        "rough_above_flat": true,
+        "raised_obstacle": true,
+        "unknown_preserved": true
+      }
+    },
+    {
+      "stamp_sec": 40,
+      "stamp_nanosec": 0,
+      "metrics": {
+        "flat": {
+          "known_cells": 70,
+          "region_cells": 70,
+          "slope_median_deg": 0.09077287465333939,
+          "roughness_median_m": 0.00980896782130003
+        },
+        "ramp": {
+          "known_cells": 19,
+          "region_cells": 24,
+          "slope_median_deg": 15.00502872467041,
+          "roughness_median_m": 0.013691417872905731
+        },
+        "rough": {
+          "known_cells": 22,
+          "region_cells": 45,
+          "slope_median_deg": 0.9707614183425903,
+          "roughness_median_m": 0.02503794990479946
+        },
+        "box_obstacle_cells": 10,
+        "unknown_cells": 1330
+      },
+      "checks": {
+        "flat_near_level": true,
+        "ramp_within_2_deg": true,
+        "rough_above_flat": true,
+        "raised_obstacle": true,
+        "unknown_preserved": true
+      }
+    },
+    {
+      "stamp_sec": 41,
+      "stamp_nanosec": 0,
+      "metrics": {
+        "flat": {
+          "known_cells": 70,
+          "region_cells": 70,
+          "slope_median_deg": 0.07521442323923111,
+          "roughness_median_m": 0.010421689599752426
+        },
+        "ramp": {
+          "known_cells": 20,
+          "region_cells": 24,
+          "slope_median_deg": 14.946993827819824,
+          "roughness_median_m": 0.013817708007991314
+        },
+        "rough": {
+          "known_cells": 22,
+          "region_cells": 45,
+          "slope_median_deg": 0.8123175501823425,
+          "roughness_median_m": 0.025637127459049225
+        },
+        "box_obstacle_cells": 10,
+        "unknown_cells": 1333
+      },
+      "checks": {
+        "flat_near_level": true,
+        "ramp_within_2_deg": true,
+        "rough_above_flat": true,
+        "raised_obstacle": true,
+        "unknown_preserved": true
+      }
+    }
+  ]
+}

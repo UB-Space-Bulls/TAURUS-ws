@@ -1,0 +1,151 @@
+Panels:
+- Class: rviz_common/Displays
+  Name: Displays
+Visualization Manager:
+  Class: ''
+  Global Options:
+    Fixed Frame: terrain_map
+    Background Color: 25; 30; 38
+    Frame Rate: 30
+  Displays:
+  - Class: rviz_default_plugins/Grid
+    Name: Reference grid
+    Enabled: true
+    Cell Size: 1
+    Plane Cell Count: 30
+  - Class: rviz_default_plugins/PointCloud2
+    Name: Ground points
+    Enabled: true
+    Topic:
+      Value: /terrain/ground_points
+      Depth: 1
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Best Effort
+    Style: Flat Squares
+    Size (m): 0.08
+    Alpha: 1
+    Decay Time: 0
+    Position Transformer: XYZ
+    Color Transformer: FlatColor
+    Color: 70; 205; 110
+  - Class: rviz_default_plugins/PointCloud2
+    Name: Obstacle points
+    Enabled: true
+    Topic:
+      Value: /terrain/obstacle_points
+      Depth: 1
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Best Effort
+    Style: Flat Squares
+    Size (m): 0.08
+    Alpha: 1
+    Decay Time: 0
+    Position Transformer: XYZ
+    Color Transformer: FlatColor
+    Color: 245; 65; 55
+  - Class: rviz_default_plugins/PointCloud2
+    Name: Unclassified returns
+    Enabled: false
+    Topic:
+      Value: /terrain/unclassified_points
+      Depth: 1
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Best Effort
+    Style: Flat Squares
+    Size (m): 0.08
+    Alpha: 1
+    Decay Time: 0
+    Position Transformer: XYZ
+    Color Transformer: FlatColor
+    Color: 240; 200; 70
+  - Class: rviz_default_plugins/PointCloud2
+    Name: Height grid (metres)
+    Enabled: false
+    Topic: &id001
+      Value: /terrain/grid_points
+      Depth: 1
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Best Effort
+    Style: Flat Squares
+    Size (m): 0.28
+    Alpha: 1
+    Decay Time: 0
+    Position Transformer: XYZ
+    Color Transformer: Intensity
+    Color: 255; 255; 255
+    Channel Name: z
+    Autocompute Intensity Bounds: false
+    Min Intensity: 0
+    Max Intensity: 1.2
+  - Class: rviz_default_plugins/PointCloud2
+    Name: Slope grid (degrees)
+    Enabled: true
+    Topic: *id001
+    Style: Flat Squares
+    Size (m): 0.28
+    Alpha: 1
+    Decay Time: 0
+    Position Transformer: XYZ
+    Color Transformer: Intensity
+    Color: 255; 255; 255
+    Channel Name: slope_deg
+    Autocompute Intensity Bounds: false
+    Min Intensity: 0
+    Max Intensity: 20
+  - Class: rviz_default_plugins/PointCloud2
+    Name: Roughness grid (metres)
+    Enabled: false
+    Topic:
+      Value: /terrain/grid_points
+      Depth: 1
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Best Effort
+    Style: Flat Squares
+    Size (m): 0.28
+    Alpha: 1
+    Decay Time: 0
+    Position Transformer: XYZ
+    Color Transformer: Intensity
+    Color: 255; 255; 255
+    Channel Name: roughness_m
+    Autocompute Intensity Bounds: false
+    Min Intensity: 0
+    Max Intensity: 0.06
+  - Class: rviz_default_plugins/Marker
+    Name: Unknown ground (gray)
+    Enabled: true
+    Marker Topic:
+      Value: /terrain/unknown_cells
+      Depth: 1
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Best Effort
+  - Class: rviz_default_plugins/Map
+    Name: Diagnostic cost preview
+    Enabled: false
+    Topic:
+      Value: /terrain/costmap_preview
+      Depth: 1
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Best Effort
+    Alpha: 0.6
+    Color Scheme: map
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 17.0
+      Pitch: 1.05
+      Yaw: 0.8
+      Focal Point:
+        X: 1.5
+        Y: 0.0
+        Z: 0.0
+Window Geometry:
+  Width: 1280
+  Height: 800

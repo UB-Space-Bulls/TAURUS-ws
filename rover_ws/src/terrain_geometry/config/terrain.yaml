@@ -1,0 +1,31 @@
+terrain_geometry:
+  ros__parameters:
+    input_topic: /unilidar/cloud
+    target_frame: terrain_map
+    processing_rate: 1.0
+    max_scan_age: 1.5
+    resolution: 0.3
+    width: 50
+    height: 40
+    origin_x: -6.0
+    origin_y: -6.0
+    min_z: -1.0
+    max_z: 3.0
+    min_points: 3
+    min_fit_points: 9
+    min_fit_cells: 3
+    fit_radius: 2
+    max_samples_per_cell: 40
+    low_quantile: 0.1
+    ground_band: 0.14
+    obstacle_height: 0.22
+    seed_x: 0.0
+    seed_y: 0.0
+    seed_radius: 2.4
+    seed_height: 0.0
+    seed_tolerance: 0.08
+    max_slope_deg: 35.0
+    step_tolerance: 0.03
+    min_xy_eigenvalue: 0.0025
+    preview_slope_deg: 20.0
+    preview_roughness: 0.06

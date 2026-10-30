@@ -1,0 +1,118 @@
+<?xml version='1.0' encoding='utf-8'?>
+<sdf version="1.9">
+  <world name="terrain_rover">
+    <physics name="physics" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics" />
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands" />
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster" />
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu" />
+    <gravity>0 0 -9.81</gravity>
+    <light name="sun" type="directional">
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+    <model name="flat_ground">
+      <static>true</static>
+      <pose>0 0 -0.1 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>30 30 0.2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>30 30 0.2</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.55 0.50 0.40 1</ambient>
+            <diffuse>0.55 0.50 0.40 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="ramp_15_degrees">
+      <static>true</static>
+      <pose>0 0 0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <mesh>
+              <uri>model://terrain_geometry/meshes/ramp.stl</uri>
+            </mesh>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <mesh>
+              <uri>model://terrain_geometry/meshes/ramp.stl</uri>
+            </mesh>
+          </geometry>
+          <material>
+            <ambient>0.20 0.55 0.75 1</ambient>
+            <diffuse>0.20 0.55 0.75 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="uneven_ground">
+      <static>true</static>
+      <pose>0 0 0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <mesh>
+              <uri>model://terrain_geometry/meshes/rough.stl</uri>
+            </mesh>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <mesh>
+              <uri>model://terrain_geometry/meshes/rough.stl</uri>
+            </mesh>
+          </geometry>
+          <material>
+            <ambient>0.55 0.35 0.20 1</ambient>
+            <diffuse>0.55 0.35 0.20 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="raised_obstacle_0_7m">
+      <static>true</static>
+      <pose>3.5 0 0.35 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.9 1.0 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.9 1.0 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.2 0.15 1</ambient>
+            <diffuse>0.8 0.2 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+  </world>
+</sdf>
