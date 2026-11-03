@@ -1,0 +1,51 @@
+# DEIMOS overrides, checked against zed-ros2-wrapper v5.2.0 / ZED SDK 5.2.
+# Upstream common_stereo.yaml and zed2.yaml are loaded first.
+# These are initial bench settings, not measured performance guarantees.
+/**:
+  ros__parameters:
+    general:
+      grab_resolution: 'HD720'
+      grab_frame_rate: 30
+      pub_resolution: 'CUSTOM'
+      pub_downscale_factor: 2.0
+      pub_frame_rate: 15.0
+
+    video:
+      publish_rgb: true
+      auto_exposure_gain: true
+      auto_whitebalance: true
+
+    depth:
+      depth_mode: 'NEURAL_LIGHT'
+      depth_stabilization: 0
+      openni_depth_mode: false  # 32-bit float depth, in meters.
+      point_cloud_freq: 5.0
+      point_cloud_res: 'REDUCED'
+      publish_depth_map: true
+      publish_point_cloud: true
+
+    sensors:
+      publish_imu: true
+      sensors_image_sync: false  # Keep IMU updates independent of image rate.
+      sensors_pub_rate: 100.0
+
+    pos_tracking:
+      pos_tracking_enabled: true
+      publish_odom_pose: true
+      imu_fusion: true
+      odometry_frame: 'zed2_odom'
+      map_frame: 'zed2_map'
+      area_memory: false
+      reset_odom_with_loop_closure: false
+      two_d_mode: false
+      # publish_tf and publish_map_tf are controlled by the launch file:
+      # upstream launch arguments take priority over YAML for these options.
+
+    mapping:
+      mapping_enabled: false
+    object_detection:
+      od_enabled: false
+    body_tracking:
+      bt_enabled: false
+    debug:
+      disable_nitros: true  # Standard ROS messages for initial acceptance.
