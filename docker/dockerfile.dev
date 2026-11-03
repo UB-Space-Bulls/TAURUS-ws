@@ -9,7 +9,6 @@
 
 FROM ros:jazzy-ros-base
 
-#comment
 ENV DEBIAN_FRONTEND=noninteractive
 ENV ROS_DISTRO=jazzy
 
