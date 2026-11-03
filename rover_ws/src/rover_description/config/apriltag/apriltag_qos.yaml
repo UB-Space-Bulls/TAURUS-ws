@@ -1,0 +1,11 @@
+/zed2/zed_node/rgb/image_rect_color:
+  reliability: best_effort
+  history: keep_last
+  depth: 5
+
+/zed2/zed_node/rgb/camera_info:
+  reliability: best_effort
+  history: keep_last
+  depth: 5
+
+  #this file runs on hopes and dreams.
