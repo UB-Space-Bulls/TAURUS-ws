@@ -64,6 +64,19 @@ just keep things from reading completely dry.
   (`swerve_kinematics_node.py`) that converts `/cmd_vel` into per-module
   steer-angle + wheel-speed commands, since no stock `ros2_controllers`
   swerve plugin exists.
+- **`rover_hardware`** — the `ros2_control` hardware interface for the real
+  drivetrain (`rover_hardware/OdescSystem`, C++): talks to the 8 ODESC motor
+  controllers (see Hardware) over CAN via SocketCAN, using ODrive's
+  CANSimple protocol. Selected by `rover.urdf.xacro`'s `hardware:=odesc`
+  arg (default `gazebo` keeps the sim path unchanged; `mock` uses
+  ros2_control's built-in fake hardware). Per-joint CAN node IDs, gear
+  ratios, and motor directions are URDF `<param>`s — **the gear ratios and
+  node IDs there are placeholders** until the real values are confirmed.
+  `scripts/fake_odesc.py` impersonates the ODESCs on a virtual CAN bus for
+  testing without hardware.
+- **`rover_bringup`** — `rover.launch.py`, the real-hardware counterpart to
+  `gazebo.launch.py`: runs the controller manager itself (no Gazebo to host
+  it) with the ODESC plugin, plus the same controllers and swerve node.
 
 ## Hardware
 
@@ -71,17 +84,19 @@ Two computers ride on the rover, linked over onboard Ethernet:
 
 - **Jetson Orin Nano 8GB** — the sensor-facing computer. Wired to the **ZED 2**
   stereo camera (USB) and the **Unitree L2** lidar (a compact 3D spinning
-  lidar). Also the natural home for the `ros2_control` hardware-interface
-  plugins (motor controllers over CAN/serial) and the swerve kinematics node,
-  since those talk to physical devices on the chassis. Runs **JetPack 6.x**
+  lidar). Does **not** drive the motors — the drivetrain hangs off the
+  ThinkPad (see below). Runs **JetPack 6.x**
   (currently ~6.1 = Jetson Linux 36.4, Ubuntu 22.04, kernel 5.15). This unit
   reportedly can't be flashed to JetPack 7.2 — which is fine, nothing in the
   current plan needs it; ROS 2 Jazzy runs in a container on top (see Docker
   architecture).
 - **ThinkPad laptop with an NVIDIA T500 GPU** (x86_64) — the second, heavier
-  compute node, for work that isn't bolted to the rover's sensors or
-  actuators: Nav2 planning, SLAM, MoveIt 2, mission/autonomy logic. **The exact
-  division of labor between the two computers is still TBD.** Its OS isn't
+  compute node: Nav2 planning, SLAM, MoveIt 2, mission/autonomy logic, **and
+  the drivetrain**. It's wired directly to the ODESC motor controllers over
+  CAN through a USB-CAN adapter, and runs the `ros2_control` controller
+  manager, the `rover_hardware` plugin, and the swerve kinematics node (see
+  Drivetrain below). **The rest of the division of labor between the two
+  computers is still TBD.** Its OS isn't
   fixed yet — target **Ubuntu 24.04 + ROS 2 Jazzy** so it matches the dev
   environment and base station and code moves onto it unchanged. Reality check
   on the T500: it's a modest GPU (Turing, 4GB) — fine for light CUDA and
@@ -92,6 +107,35 @@ Two computers ride on the rover, linked over onboard Ethernet:
 this stack — it caps out at JetPack 4.6 / Ubuntu 18.04, so no Jazzy and no
 modern anything. It stays a spare for onboarding and throwaway experiments,
 nothing on the flight rover.
+
+**Drivetrain: ThinkPad → USB-CAN adapter → ODESCs, directly.**
+
+```
+ThinkPad ──USB──▶ USB-CAN adapter ──CAN bus (1 Mbit/s)──▶ 8× ODESC V4.2 ──▶ motors
+  controller manager + rover_hardware + swerve node        (4 steer + 4 wheel)
+```
+
+- **Motor controllers:** 8x **Flipsky ODESC V4.2**, one per motor. These are
+  ODrive v3.6 clones running **ODrive firmware 0.5.6** — so the official
+  `odrive_ros2_control` plugin (ODrive Pro/S1/Micro, firmware 0.6.x only)
+  does NOT work with them, which is why `rover_hardware` exists. Each ODESC
+  runs its own motor control loops (FOC + position/velocity PID) and its own
+  watchdog; the ThinkPad just sends targets and reads encoder feedback.
+- **No microcontroller in the drive path.** The ThinkPad talks CANSimple to
+  the ODESCs itself. An STM32 can still join the same bus later for side
+  jobs (URC status LED, battery monitoring, sensors) — `rover_hardware`
+  ignores CAN traffic from node IDs it doesn't own.
+- **USB-CAN adapter:** laptops have no CAN port. Use one with an in-kernel
+  SocketCAN driver so it shows up as `can0` with no extra software —
+  CANable/candleLight (`gs_usb`) or PEAK PCAN-USB (`peak_usb`). Prefer a
+  **galvanically isolated** one: the ODESCs run off the 56V motor supply,
+  and a non-isolated adapter ties the laptop's ground to it. Bring the link
+  up before launching: `sudo ip link set can0 up type can bitrate 1000000`
+  (every ODESC's `can.config.baud_rate` must match).
+- **Bus wiring:** 120 Ω termination at both physical ends of the bus.
+- The controller manager, `rover_hardware`, and the swerve node must all run
+  on the ThinkPad — the plugin runs inside the controller manager's 100 Hz
+  loop, so motor commands shouldn't cross the Ethernet link to the Orin.
 
 Physical hardware: an Orin Nano is already on hand; full hardware for
 integration testing is still expected around **early December**.
@@ -140,8 +184,8 @@ match the case exactly in build commands on Linux.
    base image should track the Orin's actual **JetPack 6.x** — an
    `nvcr.io/nvidia/l4t-jetpack:r36.4.x` tag matching the installed Jetson
    Linux version, **not** the stale `r39.2.0` (JetPack 7.2) value. Runs on the
-   Orin Nano onboard the rover: ROS 2 Jazzy (containerized), the
-   `ros2_control` hardware-interface plugins, and the sensor drivers (the ZED
+   Orin Nano onboard the rover: ROS 2 Jazzy (containerized) and the sensor
+   drivers (the ZED
    SDK for the ZED 2 — it needs CUDA, so keep a CUDA-capable base image — plus
    the Unitree L2 driver). **No Isaac ROS.** Will NOT run on a laptop — Tegra
    drivers baked in. **Verify the exact `l4t-jetpack` tag exists on NGC before
@@ -160,7 +204,10 @@ match the case exactly in build commands on Linux.
    Safe to break — it's isolated from `dockerfile.basestation` specifically so
    experimentation here can't accidentally affect working ground-control code.
    The rover's ThinkPad, once its OS is set, can run this same image (or a
-   close sibling) since it's x86_64 too.
+   close sibling) since it's x86_64 too — including the drivetrain, since
+   `run-dev.sh`'s `--net=host` makes the host's `can0` visible inside the
+   container. (Or install Jazzy natively there: it's Ubuntu 24.04, so no
+   container is strictly required.)
 
 All three share `ros_entrypoint.sh`, which sources `/opt/ros/jazzy/setup.bash`
 on every container start (this can't be a static `ENV` var — ROS's env setup
@@ -198,10 +245,11 @@ SRDF/planning configs, ros2_control controller *definitions* (not the
 hardware interface plugin), custom ROS 2 nodes for mission/autonomy logic,
 message/service/action definitions, Zenoh config.
 
-NOT portable, needs real Orin time regardless: ros2_control hardware
-interface plugins (talk to real motor controllers over CAN/serial), camera/
-sensor drivers (the ZED SDK and the Unitree L2 driver against real devices),
-sensor calibration, real-time tuning under actual thermal/power constraints.
+NOT portable, needs real hardware time regardless: the `rover_hardware`
+plugin against real ODESCs (ThinkPad + USB-CAN adapter — `fake_odesc.py`
+only gets you so far), camera/sensor drivers on the Orin (the ZED SDK and
+the Unitree L2 driver against real devices), sensor calibration, real-time
+tuning under actual thermal/power constraints.
 
 ## Simulation strategy
 
@@ -231,9 +279,10 @@ real sensor data and constraints, not by rehearsing in a simulator live.
   across the team, any laptop.
 - **Early Dec**: hardware arrives. Confirm the Orin's JetPack 6.x, verify
   Docker + CUDA passthrough on the Orin, and get the ThinkPad's OS + ROS 2
-  installed and talking to the Orin over onboard Ethernet.
-- **Dec–mid Jan**: hardware integration — ros2_control hardware interfaces,
-  ZED 2 + Unitree L2 bringup on the Orin, `slam_toolbox` running on real lidar
+  installed and talking to the Orin over onboard Ethernet. Bring up the
+  USB-CAN adapter on the ThinkPad and talk to one ODESC.
+- **Dec–mid Jan**: hardware integration — `rover_hardware` driving the real
+  ODESCs from the ThinkPad, ZED 2 + Unitree L2 bringup on the Orin, `slam_toolbox` running on real lidar
   data, sensor calibration. Highest-risk phase; budget extra time here. Note:
   this window likely overlaps winter break/finals — decide explicitly whether
   integration work continues (even partially, remote) over break, since that

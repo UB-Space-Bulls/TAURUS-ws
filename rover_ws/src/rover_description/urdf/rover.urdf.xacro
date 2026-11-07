@@ -356,36 +356,86 @@
     </inertial>
   </link>
 
-  <xacro:macro name="steer_ros2_control" params="prefix">
+  <!-- Which hardware ros2_control drives:
+         gazebo (default) - simulated joints via gz_ros2_control (gazebo.launch.py)
+         odesc            - the real drivetrain: 8x ODESC over CAN via rover_hardware
+         mock             - ros2_control's built-in fake hardware, for testing
+                            launch/controller wiring with no sim and no CAN bus
+       e.g. xacro rover.urdf.xacro hardware:=odesc can_interface:=can0 -->
+  <xacro:arg name="hardware" default="gazebo"/>
+  <xacro:arg name="can_interface" default="can0"/>
+  <xacro:property name="hardware" value="$(arg hardware)"/>
+
+  <!-- ODESC gear ratios = motor turns per joint turn.
+       TODO: PLACEHOLDERS. Get the real values from the mech team. 1.0 is
+       the safe wrong answer: with a real ratio of e.g. 50, the motors
+       under-rotate instead of over-rotating. -->
+  <xacro:property name="steer_gear_ratio" value="1.0"/>
+  <xacro:property name="wheel_gear_ratio" value="1.0"/>
+
+  <!-- node_id = the CAN node ID set on that joint's ODESC (odrivetool:
+       axis0.config.can.node_id). direction = -1 if the motor is mounted so
+       positive motor rotation is negative joint rotation; verify per module
+       on the bench. -->
+  <xacro:macro name="steer_ros2_control" params="prefix node_id direction:=1">
     <joint name="${prefix}_steer_joint">
+      <xacro:if value="${hardware == 'odesc'}">
+        <param name="node_id">${node_id}</param>
+        <param name="gear_ratio">${steer_gear_ratio}</param>
+        <param name="direction">${direction}</param>
+      </xacro:if>
       <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
   </xacro:macro>
 
-  <xacro:macro name="wheel_ros2_control" params="prefix">
+  <xacro:macro name="wheel_ros2_control" params="prefix node_id direction:=1">
     <joint name="${prefix}_wheel_joint">
+      <xacro:if value="${hardware == 'odesc'}">
+        <param name="node_id">${node_id}</param>
+        <param name="gear_ratio">${wheel_gear_ratio}</param>
+        <param name="direction">${direction}</param>
+      </xacro:if>
       <command_interface name="velocity"/>
       <state_interface name="velocity"/>
       <state_interface name="position"/>
     </joint>
   </xacro:macro>
 
-  <ros2_control name="gz_ros2_control_system" type="system">
+  <ros2_control name="rover_system" type="system">
     <hardware>
-      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+      <xacro:if value="${hardware == 'gazebo'}">
+        <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+      </xacro:if>
+      <xacro:if value="${hardware == 'odesc'}">
+        <plugin>rover_hardware/OdescSystem</plugin>
+        <param name="can_interface">$(arg can_interface)</param>
+        <!-- Declare an ODESC dead after this long with no encoder estimates
+             (they arrive every 10 ms at the default encoder_rate_ms). -->
+        <param name="timeout_ms">100</param>
+      </xacro:if>
+      <xacro:if value="${hardware == 'mock'}">
+        <plugin>mock_components/GenericSystem</plugin>
+        <!-- Integrate velocity commands into position, so wheel joints
+             actually "turn" in RViz. -->
+        <param name="calculate_dynamics">true</param>
+      </xacro:if>
     </hardware>
-    <xacro:steer_ros2_control prefix="front_left"/>
-    <xacro:wheel_ros2_control prefix="front_left"/>
-    <xacro:steer_ros2_control prefix="front_right"/>
-    <xacro:wheel_ros2_control prefix="front_right"/>
-    <xacro:steer_ros2_control prefix="rear_left"/>
-    <xacro:wheel_ros2_control prefix="rear_left"/>
-    <xacro:steer_ros2_control prefix="rear_right"/>
-    <xacro:wheel_ros2_control prefix="rear_right"/>
+    <!-- TODO: node IDs are a placeholder assignment (steer 0-3, wheel 4-7,
+         in the same FL/FR/RL/RR order as rover_controllers.yaml). Match
+         whatever IDs actually get flashed onto the ODESCs. -->
+    <xacro:steer_ros2_control prefix="front_left" node_id="0"/>
+    <xacro:wheel_ros2_control prefix="front_left" node_id="4"/>
+    <xacro:steer_ros2_control prefix="front_right" node_id="1"/>
+    <xacro:wheel_ros2_control prefix="front_right" node_id="5"/>
+    <xacro:steer_ros2_control prefix="rear_left" node_id="2"/>
+    <xacro:wheel_ros2_control prefix="rear_left" node_id="6"/>
+    <xacro:steer_ros2_control prefix="rear_right" node_id="3"/>
+    <xacro:wheel_ros2_control prefix="rear_right" node_id="7"/>
   </ros2_control>
 
+  <xacro:if value="${hardware == 'gazebo'}">
   <gazebo>
     <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
       <parameters>$(find rover_description)/config/rover_controllers.yaml</parameters>
@@ -414,6 +464,7 @@
       <tf_topic>/odom_tf</tf_topic>
     </plugin>
   </gazebo>
+  </xacro:if>
 
   <gazebo reference="lidar_link">
     <sensor name="lidar" type="gpu_lidar">

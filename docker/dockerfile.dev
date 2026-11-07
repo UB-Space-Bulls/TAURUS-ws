@@ -64,6 +64,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # -----------------------------------------------------------------------------
+# CAN bus tooling, for rover_hardware (ODESC motor controllers over SocketCAN)
+# can-utils: candump/cansend for watching and poking raw bus traffic.
+# iproute2: `ip link` to bring can0/vcan0 up. python3-can: rover_hardware's
+# scripts/fake_odesc.py. The CAN interface itself lives on the host --
+# run-dev.sh's --net=host is what makes it visible in here.
+# -----------------------------------------------------------------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    can-utils \
+    iproute2 \
+    python3-can \
+    && rm -rf /var/lib/apt/lists/*
+
+# -----------------------------------------------------------------------------
 # Workspace
 # -----------------------------------------------------------------------------
 ENV ROS_WS=/workspaces/rover_ws
