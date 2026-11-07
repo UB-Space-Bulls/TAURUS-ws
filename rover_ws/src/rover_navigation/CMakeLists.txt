@@ -27,4 +27,9 @@ install(
   DIRECTORY launch config rviz
   DESTINATION share/${PROJECT_NAME}
 )
+install(PROGRAMS
+  scripts/terrain_cost_grid.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()
