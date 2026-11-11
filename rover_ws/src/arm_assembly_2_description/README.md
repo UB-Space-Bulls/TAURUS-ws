@@ -32,13 +32,37 @@ So when deploying to the Orin / ThinkPad, the `.dae` files can be left out
 to save space. **Do not drop the `.stl` files** — without them MoveIt 2 has
 no collision geometry for the arm.
 
+## Naming
+
+Links and joints are numbered along the arm, base to gripper. Every name
+starts with `arm_` so nothing clashes with the rover chassis's own
+`base_link` (etc.) once the arm is mounted on it. Each mesh file is named
+after the link that uses it.
+
+| Joint    | Type       | Moves          | What it is                        |
+|----------|------------|----------------|-----------------------------------|
+| —        | —          | `arm_link0`    | Base rail (root link)             |
+| `arm_j1` | prismatic  | `arm_link1`    | Carriage sliding along the rail   |
+| `arm_j2` | revolute   | `arm_link2`    | Shoulder → upper arm              |
+| `arm_j3` | revolute   | `arm_link3`    | Elbow → forearm                   |
+| `arm_j4` | revolute   | `arm_link4`    | Wrist pitch                       |
+| `arm_j5` | continuous | `arm_link5`    | Wrist roll → gripper housing      |
+| `arm_j6` | revolute   | `arm_link6_*`  | Gripper open/close                |
+
+Only `arm_j1`–`arm_j6` are driven. The rest are **passive**: they use
+`<mimic>` to follow a driven joint automatically, and are named after it:
+
+- `arm_j3_rod`, `arm_j3_crank` (`arm_link3_rod`, `arm_link3_crank`): the
+  elbow's drive linkage, follows `arm_j3`.
+- `arm_j6_*` (`arm_link6_{left,right}_{crank,finger,jaw,pad}`): the gripper
+  linkage, follows `arm_j6`, which drives the left crank directly.
+  `arm_link6_pad` is one mesh shared by both pads.
+
 ## Notes on this export
 
-- The SolidWorks part originally named `FUCK_1` was renamed to
-  `arm_slider_1` (link and mesh files). It's the carriage on the prismatic
-  joint off `base_link`. Rename the part in SolidWorks too, or the next
-  re-export will bring the old name back.
-- Most link names are SolidWorks auto-generated timestamps
-  (`c_2026_10_13_...`). Worth giving the parts real names in CAD before the
-  next export so MoveIt 2 configs are readable.
+- **Names were changed by hand after the export.** SolidWorks gave most
+  parts timestamp names (`c_2026_10_13_17_13_30_019_1`, `Assembly43_1`,
+  ...) and one part was named `FUCK_1` (now `arm_link1`). A fresh export
+  will bring the old names back unless the parts are renamed in CAD.
+  "Left"/"right" on the gripper is assigned arbitrarily for now.
 - `package.xml` maintainer/license are still the exporter's placeholders.

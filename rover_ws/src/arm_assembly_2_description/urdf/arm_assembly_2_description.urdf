@@ -1,17 +1,17 @@
 <?xml version="1.0"?>
 <robot name="arm_assembly_2_description">
-  <link name="base_link">
+  <link name="arm_link0">
     <!-- sw2robot inertia="solidworks" -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_09_25_14_27_03_587_1.dae" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link0.dae" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_09_25_14_27_03_587_1.stl" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link0.stl" />
       </geometry>
     </collision>
     <inertial>
@@ -20,18 +20,18 @@
       <inertia ixx="0.00202497" ixy="4.14915e-07" ixz="0.000230384" iyy="0.0219981" iyz="-1.18141e-07" izz="0.0234325" />
     </inertial>
   </link>
-  <link name="c_2026_10_02_13_17_20_162_1">
+  <link name="arm_link4">
     <!-- sw2robot inertia="solidworks" -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_02_13_17_20_162_1.dae" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link4.dae" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_02_13_17_20_162_1.stl" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link4.stl" />
       </geometry>
     </collision>
     <inertial>
@@ -40,18 +40,18 @@
       <inertia ixx="0.000239143" ixy="3.29258e-05" ixz="2.86838e-06" iyy="0.000251357" iyz="-1.08152e-06" izz="0.000159534" />
     </inertial>
   </link>
-  <link name="c_2026_10_13_17_04_13_208_3">
+  <link name="arm_link6_left_crank">
     <!-- sw2robot appearance="color" density="1000" inertia="solidworks" -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_13_17_04_13_208_3.dae" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link6_left_crank.dae" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_13_17_04_13_208_3.stl" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link6_left_crank.stl" />
       </geometry>
     </collision>
     <inertial>
@@ -60,18 +60,18 @@
       <inertia ixx="9.85636e-06" ixy="-3.53535e-11" ixz="1.71259e-06" iyy="5.58901e-05" iyz="2.75917e-10" izz="5.1307e-05" />
     </inertial>
   </link>
-  <link name="c_2026_10_13_17_04_13_208_1_3">
+  <link name="arm_link6_right_crank">
     <!-- sw2robot appearance="color" density="1000" inertia="solidworks" -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_13_17_04_13_208_1_3.dae" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link6_right_crank.dae" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_13_17_04_13_208_1_3.stl" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link6_right_crank.stl" />
       </geometry>
     </collision>
     <inertial>
@@ -80,18 +80,18 @@
       <inertia ixx="1.01743e-05" ixy="-1.20441e-13" ixz="-4.01627e-06" iyy="5.58875e-05" iyz="-5.99788e-10" izz="5.09858e-05" />
     </inertial>
   </link>
-  <link name="c_2026_10_13_17_13_30_019_1">
+  <link name="arm_link2">
     <!-- sw2robot inertia="solidworks" -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_13_17_13_30_019_1.dae" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link2.dae" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_13_17_13_30_019_1.stl" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link2.stl" />
       </geometry>
     </collision>
     <inertial>
@@ -100,18 +100,18 @@
       <inertia ixx="0.00595736" ixy="-0.00243458" ixz="1.34782e-06" iyy="0.00152342" iyz="-0.000164387" izz="0.00692207" />
     </inertial>
   </link>
-  <link name="c_2026_10_13_18_54_57_497_5">
+  <link name="arm_link6_left_jaw">
     <!-- sw2robot appearance="color" density="1000" inertia="solidworks" -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_13_18_54_57_497_5.dae" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link6_left_jaw.dae" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_13_18_54_57_497_5.stl" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link6_left_jaw.stl" />
       </geometry>
     </collision>
     <inertial>
@@ -120,18 +120,18 @@
       <inertia ixx="1.59391e-06" ixy="-1.435e-18" ixz="4.29681e-07" iyy="1.24808e-05" iyz="2.74743e-18" izz="1.31616e-05" />
     </inertial>
   </link>
-  <link name="c_2026_10_13_18_54_57_497_6">
+  <link name="arm_link6_right_jaw">
     <!-- sw2robot appearance="color" density="1000" inertia="solidworks" -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_13_18_54_57_497_5_2.dae" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link6_right_jaw.dae" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_13_18_54_57_497_5_2.stl" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link6_right_jaw.stl" />
       </geometry>
     </collision>
     <inertial>
@@ -140,18 +140,18 @@
       <inertia ixx="1.57922e-06" ixy="-3.5725e-18" ixz="-1.20043e-07" iyy="1.24808e-05" iyz="2.64786e-18" izz="1.31763e-05" />
     </inertial>
   </link>
-  <link name="c_2026_10_14_15_01_44_499_5">
+  <link name="arm_link6_right_finger">
     <!-- sw2robot appearance="color" density="1000" inertia="solidworks" -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_14_15_01_44_499_5.dae" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link6_right_finger.dae" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_14_15_01_44_499_5.stl" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link6_right_finger.stl" />
       </geometry>
     </collision>
     <inertial>
@@ -160,18 +160,18 @@
       <inertia ixx="3.27525e-06" ixy="2.06466e-18" ixz="5.62063e-07" iyy="3.63841e-06" iyz="-1.21439e-17" izz="4.48473e-07" />
     </inertial>
   </link>
-  <link name="c_2026_10_14_15_01_44_499_6">
+  <link name="arm_link6_left_finger">
     <!-- sw2robot appearance="color" density="1000" inertia="solidworks" -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_14_15_01_44_499_5_2.dae" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link6_left_finger.dae" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_14_15_01_44_499_5_2.stl" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link6_left_finger.stl" />
       </geometry>
     </collision>
     <inertial>
@@ -180,18 +180,18 @@
       <inertia ixx="3.27526e-06" ixy="-2.27086e-18" ixz="-5.62063e-07" iyy="3.63841e-06" iyz="-1.24623e-17" izz="4.48473e-07" />
     </inertial>
   </link>
-  <link name="c_2026_10_14_15_27_46_718_5">
+  <link name="arm_link6_right_pad">
     <!-- sw2robot appearance="color" density="1000" inertia="solidworks" -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_14_15_27_46_718_5.dae" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link6_pad.dae" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_14_15_27_46_718_5.stl" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link6_pad.stl" />
       </geometry>
     </collision>
     <inertial>
@@ -200,18 +200,18 @@
       <inertia ixx="1.30797e-06" ixy="-6.3113e-07" ixz="2.88958e-22" iyy="1.44917e-06" iyz="-1.44493e-22" izz="2.23236e-06" />
     </inertial>
   </link>
-  <link name="c_2026_10_14_15_27_46_718_6">
+  <link name="arm_link6_left_pad">
     <!-- sw2robot appearance="color" density="1000" inertia="solidworks" -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_14_15_27_46_718_5.dae" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link6_pad.dae" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_14_15_27_46_718_5.stl" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link6_pad.stl" />
       </geometry>
     </collision>
     <inertial>
@@ -220,18 +220,18 @@
       <inertia ixx="1.30797e-06" ixy="-6.3113e-07" ixz="2.88958e-22" iyy="1.44917e-06" iyz="-1.44493e-22" izz="2.23236e-06" />
     </inertial>
   </link>
-  <link name="c_2026_10_16_18_01_23_610_1">
+  <link name="arm_link3">
     <!-- sw2robot inertia="solidworks" -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_16_18_01_23_610_1.dae" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link3.dae" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/c_2026_10_16_18_01_23_610_1.stl" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link3.stl" />
       </geometry>
     </collision>
     <inertial>
@@ -240,18 +240,18 @@
       <inertia ixx="0.00110423" ixy="4.82873e-05" ixz="-3.81341e-06" iyy="0.00808934" iyz="-1.95959e-06" izz="0.00775189" />
     </inertial>
   </link>
-  <link name="Assembly43_1">
+  <link name="arm_link3_rod">
     <!-- sw2robot inertia="solidworks" -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/Assembly43_1.dae" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link3_rod.dae" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/Assembly43_1.stl" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link3_rod.stl" />
       </geometry>
     </collision>
     <inertial>
@@ -260,18 +260,18 @@
       <inertia ixx="0.00248471" ixy="-0.0010931" ixz="-1.01748e-10" iyy="0.000504912" iyz="2.35528e-07" izz="0.0029891" />
     </inertial>
   </link>
-  <link name="Assembly45_1">
+  <link name="arm_link3_crank">
     <!-- sw2robot inertia="solidworks" -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/Assembly45_1.dae" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link3_crank.dae" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/Assembly45_1.stl" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link3_crank.stl" />
       </geometry>
     </collision>
     <inertial>
@@ -280,18 +280,18 @@
       <inertia ixx="2.39938e-05" ixy="3.20305e-06" ixz="1.01181e-05" iyy="0.000310365" iyz="5.2041e-08" izz="0.000324933" />
     </inertial>
   </link>
-  <link name="Assembly51_1">
+  <link name="arm_link5">
     <!-- sw2robot inertia="solidworks" -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/Assembly51_1.dae" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link5.dae" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/Assembly51_1.stl" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link5.stl" />
       </geometry>
     </collision>
     <inertial>
@@ -300,18 +300,18 @@
       <inertia ixx="0.000835824" ixy="1.02141e-05" ixz="-8.02801e-08" iyy="0.00100792" iyz="1.6059e-08" izz="0.000396598" />
     </inertial>
   </link>
-  <link name="arm_slider_1">
+  <link name="arm_link1">
     <!-- sw2robot inertia="solidworks" -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/arm_slider_1.dae" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link1.dae" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://arm_assembly_2_description/meshes/arm_slider_1.stl" />
+        <mesh filename="package://arm_assembly_2_description/meshes/arm_link1.stl" />
       </geometry>
     </collision>
     <inertial>
@@ -320,134 +320,134 @@
       <inertia ixx="0.0453041" ixy="-1.25739e-12" ixz="1.93267e-06" iyy="0.0442695" iyz="-2.48866e-05" izz="0.00264036" />
     </inertial>
   </link>
-  <joint name="c_2026_10_02_13_17_20_162_1__Assembly51_1" type="continuous">
+  <joint name="arm_j5" type="continuous">
     <origin xyz="-0.03108012574 0 -0.050587" rpy="0 0 0" />
-    <parent link="c_2026_10_02_13_17_20_162_1" />
-    <child link="Assembly51_1" />
+    <parent link="arm_link4" />
+    <child link="arm_link5" />
     <axis xyz="-1 0 0" />
     <!-- mates: COINCIDENT, CONCENTRIC, COINCIDENT, CONCENTRIC -->
     <!-- sw2robot-note: geo: free rotation about mate axis (1 DOF); config sets continuous (inference said revolute) -->
   </joint>
-  <joint name="Assembly51_1__c_2026_10_13_17_04_13_208_3" type="revolute">
+  <joint name="arm_j6" type="revolute">
     <origin xyz="-0.092538 -0.01250000018 0.03300000008" rpy="0 0 0" />
-    <parent link="Assembly51_1" />
-    <child link="c_2026_10_13_17_04_13_208_3" />
+    <parent link="arm_link5" />
+    <child link="arm_link6_left_crank" />
     <axis xyz="0 -1 0" />
     <limit lower="-0.97957" upper="0" effort="10" velocity="3.14" />
     <!-- mates: CONCENTRIC, COINCIDENT, CONCENTRIC, COINCIDENT -->
     <!-- sw2robot-note: geo: free rotation about mate axis (1 DOF) -->
   </joint>
-  <joint name="Assembly51_1__c_2026_10_13_17_04_13_208_1_3" type="revolute">
+  <joint name="arm_j6_right_crank" type="revolute">
     <origin xyz="-0.092538 -0.01600000018 -0.03299999992" rpy="0 0 0" />
-    <parent link="Assembly51_1" />
-    <child link="c_2026_10_13_17_04_13_208_1_3" />
+    <parent link="arm_link5" />
+    <child link="arm_link6_right_crank" />
     <axis xyz="0 -1 0" />
     <limit lower="-0.41233" upper="0.99047" effort="10" velocity="3.14" />
-    <mimic joint="Assembly51_1__c_2026_10_13_17_04_13_208_3" multiplier="-1" offset="0" />
+    <mimic joint="arm_j6" multiplier="-1" offset="0" />
     <!-- mates: CONCENTRIC, COINCIDENT, CONCENTRIC, COINCIDENT -->
     <!-- sw2robot-note: geo: free rotation about mate axis (1 DOF) -->
   </joint>
-  <joint name="c_2026_10_16_18_01_23_610_1__c_2026_10_02_13_17_20_162_1" type="revolute">
+  <joint name="arm_j4" type="revolute">
     <origin xyz="-0.2402850627 0.0005078619718 0.01521200001" rpy="0 0 0" />
-    <parent link="c_2026_10_16_18_01_23_610_1" />
-    <child link="c_2026_10_02_13_17_20_162_1" />
+    <parent link="arm_link3" />
+    <child link="arm_link4" />
     <axis xyz="0 0 -1" />
     <limit lower="-1.83041" upper="1.83041" effort="10" velocity="3.14" />
     <!-- mates: CONCENTRIC, COINCIDENT, CONCENTRIC, COINCIDENT -->
     <!-- sw2robot-note: geo: free rotation about mate axis (1 DOF) -->
   </joint>
-  <joint name="c_2026_10_13_17_04_13_208_3__c_2026_10_14_15_01_44_499_6" type="continuous">
+  <joint name="arm_j6_left_finger" type="continuous">
     <origin xyz="-0.06993844341 0.0035 0.002934984408" rpy="0 0 0" />
-    <parent link="c_2026_10_13_17_04_13_208_3" />
-    <child link="c_2026_10_14_15_01_44_499_6" />
+    <parent link="arm_link6_left_crank" />
+    <child link="arm_link6_left_finger" />
     <axis xyz="0 1 0" />
-    <mimic joint="Assembly51_1__c_2026_10_13_17_04_13_208_3" multiplier="1" offset="0" />
+    <mimic joint="arm_j6" multiplier="1" offset="0" />
     <!-- mates: CONCENTRIC, COINCIDENT, CONCENTRIC, COINCIDENT -->
     <!-- sw2robot-note: geo: free rotation about mate axis (1 DOF); config sets continuous (inference said revolute) -->
   </joint>
-  <joint name="c_2026_10_13_17_04_13_208_1_3__c_2026_10_14_15_01_44_499_5" type="continuous">
+  <joint name="arm_j6_right_finger" type="continuous">
     <origin xyz="-0.06999189942 0.007 -0.001064901375" rpy="0 0 0" />
-    <parent link="c_2026_10_13_17_04_13_208_1_3" />
-    <child link="c_2026_10_14_15_01_44_499_5" />
+    <parent link="arm_link6_right_crank" />
+    <child link="arm_link6_right_finger" />
     <axis xyz="0 1 0" />
-    <mimic joint="Assembly51_1__c_2026_10_13_17_04_13_208_3" multiplier="-1" offset="0" />
+    <mimic joint="arm_j6" multiplier="-1" offset="0" />
     <!-- mates: CONCENTRIC, COINCIDENT, CONCENTRIC, COINCIDENT -->
     <!-- sw2robot-note: geo: free rotation about mate axis (1 DOF); config sets continuous (inference said revolute) -->
   </joint>
-  <joint name="c_2026_10_13_17_13_30_019_1__c_2026_10_16_18_01_23_610_1" type="revolute">
+  <joint name="arm_j3" type="revolute">
     <origin xyz="0 -0.5 0.019525" rpy="0 0 0" />
-    <parent link="c_2026_10_13_17_13_30_019_1" />
-    <child link="c_2026_10_16_18_01_23_610_1" />
+    <parent link="arm_link2" />
+    <child link="arm_link3" />
     <axis xyz="0 0 1" />
     <limit lower="-0.6981317008" upper="1.047197551" effort="10" velocity="3.14" />
     <!-- mates: CONCENTRIC, COINCIDENT, CONCENTRIC, COINCIDENT -->
     <!-- sw2robot-note: geo: free rotation about mate axis (1 DOF) -->
   </joint>
-  <joint name="c_2026_10_16_18_01_23_610_1__Assembly43_1" type="continuous">
+  <joint name="arm_j3_rod" type="continuous">
     <origin xyz="0.1202149373 0.0005078619719 -0.0383" rpy="0 0 0" />
-    <parent link="c_2026_10_16_18_01_23_610_1" />
-    <child link="Assembly43_1" />
+    <parent link="arm_link3" />
+    <child link="arm_link3_rod" />
     <axis xyz="0 0 1" />
-    <mimic joint="c_2026_10_13_17_13_30_019_1__c_2026_10_16_18_01_23_610_1" multiplier="-1" offset="0" />
+    <mimic joint="arm_j3" multiplier="-1" offset="0" />
     <!-- mates: CONCENTRIC, COINCIDENT, CONCENTRIC, COINCIDENT -->
     <!-- sw2robot-note: geo: free rotation about mate axis (1 DOF); config sets continuous (inference said revolute) -->
   </joint>
-  <joint name="c_2026_10_14_15_01_44_499_6__c_2026_10_13_18_54_57_497_5" type="continuous">
+  <joint name="arm_j6_left_jaw" type="continuous">
     <origin xyz="0.01710658538 0.009000000075 0.04699962758" rpy="0 0 0" />
-    <parent link="c_2026_10_14_15_01_44_499_6" />
-    <child link="c_2026_10_13_18_54_57_497_5" />
+    <parent link="arm_link6_left_finger" />
+    <child link="arm_link6_left_jaw" />
     <axis xyz="0 1 0" />
-    <mimic joint="Assembly51_1__c_2026_10_13_17_04_13_208_3" multiplier="-1" offset="0" />
+    <mimic joint="arm_j6" multiplier="-1" offset="0" />
     <!-- mates: CONCENTRIC, COINCIDENT, CONCENTRIC, COINCIDENT -->
     <!-- sw2robot-note: geo: free rotation about mate axis (1 DOF); config sets continuous (inference said revolute) -->
   </joint>
-  <joint name="c_2026_10_14_15_01_44_499_6__c_2026_10_14_15_27_46_718_6" type="fixed">
+  <joint name="arm_j6_left_pad" type="fixed">
     <origin xyz="-0.02907280107 0.008500000071 -0.02116023279" rpy="-1.570796327 0.0007636678114 0" />
-    <parent link="c_2026_10_14_15_01_44_499_6" />
-    <child link="c_2026_10_14_15_27_46_718_6" />
+    <parent link="arm_link6_left_finger" />
+    <child link="arm_link6_left_pad" />
     <axis xyz="0 0 1" />
     <!-- mates: CONCENTRIC, COINCIDENT, CONCENTRIC, COINCIDENT -->
     <!-- sw2robot-note: geo: free rotation about mate axis (1 DOF); config sets fixed (inference said revolute) -->
   </joint>
-  <joint name="c_2026_10_14_15_01_44_499_5__c_2026_10_14_15_27_46_718_5" type="fixed">
+  <joint name="arm_j6_right_pad" type="fixed">
     <origin xyz="-0.02904047187 0.009699999925 0.02117406085" rpy="1.570796327 0.0007636576956 0" />
-    <parent link="c_2026_10_14_15_01_44_499_5" />
-    <child link="c_2026_10_14_15_27_46_718_5" />
+    <parent link="arm_link6_right_finger" />
+    <child link="arm_link6_right_pad" />
     <axis xyz="0 0 1" />
     <!-- mates: CONCENTRIC, COINCIDENT, CONCENTRIC, COINCIDENT -->
     <!-- sw2robot-note: geo: free rotation about mate axis (1 DOF); config sets fixed (inference said revolute) -->
   </joint>
-  <joint name="c_2026_10_14_15_01_44_499_5__c_2026_10_13_18_54_57_497_6" type="continuous">
+  <joint name="arm_j6_right_jaw" type="continuous">
     <origin xyz="0.01710659566 0.01349999993 -0.04699962384" rpy="0 0 0" />
-    <parent link="c_2026_10_14_15_01_44_499_5" />
-    <child link="c_2026_10_13_18_54_57_497_6" />
+    <parent link="arm_link6_right_finger" />
+    <child link="arm_link6_right_jaw" />
     <axis xyz="0 -1 0" />
-    <mimic joint="Assembly51_1__c_2026_10_13_17_04_13_208_3" multiplier="-1" offset="0" />
+    <mimic joint="arm_j6" multiplier="-1" offset="0" />
     <!-- mates: COINCIDENT, COINCIDENT -->
     <!-- sw2robot-note: geo: free rotation about mate axis (2 DOF); config sets continuous (inference said revolute) -->
   </joint>
-  <joint name="arm_slider_1__c_2026_10_13_17_13_30_019_1" type="revolute">
+  <joint name="arm_j2" type="revolute">
     <origin xyz="0.04500276571 -0.068111 0.2534454193" rpy="0 0 0" />
-    <parent link="arm_slider_1" />
-    <child link="c_2026_10_13_17_13_30_019_1" />
+    <parent link="arm_link1" />
+    <child link="arm_link2" />
     <axis xyz="0 0 1" />
     <limit lower="-1.75406" upper="0.45597" effort="10" velocity="3.14" />
     <!-- mates: CONCENTRIC, DISTANCE, CONCENTRIC, DISTANCE -->
     <!-- sw2robot-note: geo: free rotation about mate axis (1 DOF) -->
   </joint>
-  <joint name="Assembly43_1__Assembly45_1" type="continuous">
+  <joint name="arm_j3_crank" type="continuous">
     <origin xyz="-0.000216011819 0.4999999533 0.006425" rpy="0 0 0" />
-    <parent link="Assembly43_1" />
-    <child link="Assembly45_1" />
+    <parent link="arm_link3_rod" />
+    <child link="arm_link3_crank" />
     <axis xyz="0 0 1" />
-    <mimic joint="c_2026_10_13_17_13_30_019_1__c_2026_10_16_18_01_23_610_1" multiplier="1" offset="0" />
+    <mimic joint="arm_j3" multiplier="1" offset="0" />
     <!-- mates: CONCENTRIC, COINCIDENT, CONCENTRIC, COINCIDENT -->
     <!-- sw2robot-note: geo: free rotation about mate axis (1 DOF); config sets continuous (inference said revolute) -->
   </joint>
-  <joint name="c_2026_09_25_14_27_03_587_1__arm_slider_1" type="prismatic">
+  <joint name="arm_j1" type="prismatic">
     <origin xyz="-0.2550001172 0.04499999999 0.03189906333" rpy="-1.570792654 0 -1.570796327" />
-    <parent link="base_link" />
-    <child link="arm_slider_1" />
+    <parent link="arm_link0" />
+    <child link="arm_link1" />
     <axis xyz="0 0 -1" />
     <limit lower="-0.196" upper="0.134" effort="10" velocity="3.14" />
     <!-- mates: CONCENTRIC, CONCENTRIC -->

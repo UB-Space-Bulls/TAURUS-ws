@@ -23,7 +23,7 @@ Visualization Manager:
       Name: TF
       Marker Scale: 0.1554
   Global Options:
-    Fixed Frame: base_link
+    Fixed Frame: arm_link0
     Frame Rate: 30
   Tools:
     - Class: rviz_default_plugins/MoveCamera
