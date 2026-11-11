@@ -47,16 +47,16 @@ after the link that uses it.
 | `arm_j3` | revolute   | `arm_link3`    | Elbow → forearm                   |
 | `arm_j4` | revolute   | `arm_link4`    | Wrist pitch                       |
 | `arm_j5` | continuous | `arm_link5`    | Wrist roll → gripper housing      |
-| `arm_j6` | revolute   | `arm_link6_*`  | Gripper open/close                |
+| `arm_end_effector_joint` | revolute | `arm_end_effector_*` | Gripper open/close |
 
-Only `arm_j1`–`arm_j6` are driven. The rest are **passive**: they use
+Only `arm_j1`–`arm_j5` and `arm_end_effector_joint` are driven. The rest are **passive**: they use
 `<mimic>` to follow a driven joint automatically, and are named after it:
 
 - `arm_j3_rod`, `arm_j3_crank` (`arm_link3_rod`, `arm_link3_crank`): the
   elbow's drive linkage, follows `arm_j3`.
-- `arm_j6_*` (`arm_link6_{left,right}_{crank,finger,jaw,pad}`): the gripper
-  linkage, follows `arm_j6`, which drives the left crank directly.
-  `arm_link6_pad` is one mesh shared by both pads.
+- `arm_end_effector_*_joint` (links `arm_end_effector_{left,right}_{crank,finger,jaw,pad}`):
+  the gripper linkage, follows `arm_end_effector_joint`, which drives the
+  left crank directly. `arm_end_effector_pad` is one mesh shared by both pads.
 
 ## Notes on this export
 
