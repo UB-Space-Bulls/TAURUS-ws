@@ -3,8 +3,8 @@ Steps:
 To run sim
 ros2 launch rover_description gazebo.launch.py
 
-Then use ros2 run 
-teleop_twist_keyboard teleop_twist_keyboard 
+Then use 
+ros2 run teleop_twist_keyboard teleop_twist_keyboard 
 this connect keyboard inputs to the sim
 
 Open a new terminal and open the docker session:
@@ -18,4 +18,6 @@ This will allow you to connect to the websocket that is open for the foxglove br
 ws://localhost:8765
 
 Once connected, import the panel layout from the repo. It is fonud in DEIMOS-ws/src/foxglove/DEIMOST-Panel.json.
+
+Once connected, you need to go to your profile, then settings, then Desktop, then set ROS_PACKAGE_PATH to the path that the DEIMOS-ws is at on your device.
 

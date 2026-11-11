@@ -41,29 +41,13 @@
         "poseEstimateThetaDeviation": 0.26179939
       },
       "synchronize": false,
-      "imageMode": {},
-      "foxglovePanelTitle": "Camera View"
+      "imageMode": {
+        "imageTopic": ""
+      }
     },
     "Plot!465o0ng": {
       "showLegend": true,
-      "paths": [
-        {
-          "timestampMethod": "receiveTime",
-          "value": "",
-          "enabled": true,
-          "color": "#4e98e2",
-          "id": "a5a236a7-b49d-42df-bc79-c9034a1d0f83",
-          "label": "Angular Velocity"
-        },
-        {
-          "timestampMethod": "receiveTime",
-          "value": "",
-          "enabled": true,
-          "color": "#f5774d",
-          "id": "5cff5d84-97d6-49f7-a7aa-34fd2b02ec49",
-          "label": "Linear Acceleration"
-        }
-      ],
+      "paths": [],
       "foxglovePanelTitle": "IMU",
       "secondaryAxes": [
         {
@@ -102,13 +86,13 @@
     "3D!ygdgsi": {
       "cameraState": {
         "perspective": true,
-        "distance": 19.999999999999808,
-        "phi": 60.00000000000026,
-        "thetaOffset": 60.00000000000129,
+        "distance": 6.47067089947216,
+        "phi": 60.000000000015795,
+        "thetaOffset": 60.000000000017984,
         "targetOffset": [
-          -0.054602277389016296,
-          -2.544127745343747,
-          -5.582673502540467e-17
+          -6.381968713095918,
+          3.4996130278329356,
+          2.5332093710282704e-16
         ],
         "target": [
           0,
@@ -126,10 +110,30 @@
         "far": 5000
       },
       "followMode": "follow-pose",
-      "followTf": "base_link",
-      "scene": {},
+      "followTf": "odom",
+      "scene": {
+        "transforms": {
+          "showLabel": true
+        }
+      },
       "transforms": {},
-      "topics": {},
+      "topics": {
+        "/initialpose": {
+          "visible": true
+        },
+        "/move_base_simple/goal": {
+          "visible": true
+        },
+        "/robot_description": {
+          "visible": true
+        },
+        "/scan": {
+          "visible": true,
+          "colorField": "intensity",
+          "colorMode": "colormap",
+          "colorMap": "turbo"
+        }
+      },
       "layers": {
         "grid": {
           "visible": true,
@@ -165,8 +169,23 @@
       "imageMode": {}
     },
     "Plot!3c7w8j4": {
-      "minYValue": 0,
-      "maxYValue": 1
+      "paths": [
+        {
+          "timestampMethod": "receiveTime",
+          "value": "/odom.pose.pose.position.y",
+          "enabled": true,
+          "color": "#4e98e2",
+          "id": "0986a5ab-ee08-40bd-b4aa-926c1b267325"
+        },
+        {
+          "timestampMethod": "receiveTime",
+          "value": "/odom.pose.pose.position.x",
+          "enabled": true,
+          "color": "#f5774d",
+          "id": "b8f64916-3367-4a67-9b08-d0e0e6ac77eb"
+        }
+      ],
+      "showLegend": false
     }
   },
   "globalVariables": {},
