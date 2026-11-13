@@ -1,0 +1,13 @@
+# Copy this file and replace nulls with MEASURED values before use.
+# Pose of the L1 bottom-center frame in your gravity-aligned target frame.
+# A floor-origin frame has ground z=0, matching the default seed_height.
+parent_frame: terrain_map
+child_frame: unilidar_lidar
+x: 0.0
+y: 0.0
+z: null
+roll: null
+pitch: 0.0
+yaw: 0.0
+# Angles are radians. An exactly inverted mount has roll=3.141592653589793.
+# Use a measured roll/pitch if the bracket is tilted. Upright +Z sees upward.

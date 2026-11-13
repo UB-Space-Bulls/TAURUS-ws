@@ -1,58 +1,79 @@
-# Validation status
+# Validation — terrain_geometry v0.5.0
 
-Geometry results prepared 2026-10-25; the 23 tests were rerun after the
-single-package conversion on 2026-10-28. These results are from offline code in the
-authoring environment. They are not measurements from a running ROS/Gazebo
-system or the physical rover.
+Updated 13 November 2026. ROS 2 is not installed in this environment; the new
+Nav2 connection has not been launched against Jazzy or real hardware here.
+
+| Current check | Result |
+|---|---|
+| Offline terrain, mounting, cost conversion, freshness and profile tests | 38 passed |
+| Cost conversion | Unknown preserved; obstacles take priority; graded/lethal thresholds and float32 boundaries checked |
+| Freshness | Expiry, paused clocks, repeated/out-of-order stamps and clock resets checked |
+| DEIMOS configuration | Generated from nav2 commit 730c412f3fab6b3c654cf606098fa659fa3241e7; both costmaps configured, scan and robot geometry preserved |
+| Config CLI | Separate output generated; existing output and original input protected |
+| Python syntax, XML, YAML/RViz, internal Markdown links | Passed |
+| Archive | Integrity, single package, executable scripts and unchanged TerrainGrid message checked |
+| ROS 2 launch, Nav2 lifecycle/TF, RViz and real L1 | Not run; required on the ROS computer |
+
+The implementation was checked against the upstream Jazzy StaticLayer and
+CostmapLayer source: full OccupancyGrid input, graded costs, unknown handling and
+rolling-frame transforms. This source review does not replace a running Nav2
+test. In particular, StaticLayer retains its last map if the adapter dies; the
+freshness heartbeat needs independent supervision before autonomous motion.
+See [NAV2_INTEGRATION.md](NAV2_INTEGRATION.md) for the bench and integration checks.
+
+The earlier checks below are retained as the prior release record. Native driver
+builds and staged ament installations were not rerun for this adapter-only update.
+
+## Earlier two-package edition checks (v0.4.0)
+
+Prepared 12 November 2026. These are software checks in a Linux x86_64 runtime,
+not a physical L1 demonstration.
 
 | Check | Result |
 |---|---|
-| Python geometry regression tests | 23 passed |
-| Flat region median slope | 0.04484°; 70/70 interior region cells valid |
-| Ramp median slope | 15.0321° vs 15.0° ground truth; 17/24 interior cells valid |
-| Uneven region median roughness | 0.0216934 m; 23/45 interior cells valid |
-| Flat median roughness | 0.0041784 m with synthetic range noise |
-| Raised box cells with obstacle evidence | 8 |
-| Cells without valid ground | 1318 / 2000, preserved as unknown ground |
-| First-return cloud size | 20,532 returns before ROI filtering |
-| Measured processing duration | About 0.30 s for this cloud on this runtime; not a rover benchmark |
+| Native SDK and passive wire readers: CMake build/link with supplied x86_64 SDK | Passed |
+| Driver health and synthetic serial tests | 15 passed, including real SDK decoding of PTY fixtures |
+| Terrain geometry, nonfinite filtering, measured mounts and mount-file CLI | 23 passed |
+| Python syntax, package XML, YAML/RViz configuration and local guide links | Passed (vendor documentation retained as upstream excerpts) |
+| Script installation, normal and upstream Jazzy symlink handler | Passed from source files deliberately set to 0644; installed scripts executable |
+| Installed imports/native reader lookup and missing-device report | Passed in staged installations |
+| ZIP integrity and executable permissions after unzip | Passed |
+| Grid message definition | Byte-identical to the previous terrain package |
+| Package boundaries | Separate manifests; neither depends on the other; no Gazebo dependency |
+| ROS 2 Jazzy colcon build, live launch and RViz | Not run: ROS 2 absent in this environment |
+| Real L1, USB adapter, real terrain and aarch64 execution | Not run: hardware unavailable |
 
-The offline model uses the same triangle geometry and LiDAR angle/range limits
-as the L1-envelope test world (240×90 rays, inverted native hemisphere). It
-selects the nearest hit, accounting for occlusion and the finite floor, then
-adds synthetic Gaussian range noise (σ=0.01 m, seed 42). These are simulated
-measurements, not a claim of physical sensor accuracy. Areas with insufficient
-returns and areas behind raised objects remain unknown. The 21,600 rays in a
-1 Hz raster are a simulation batching choice, not the real L1 mirror pattern.
+The staged install check uses the actual upstream Jazzy program-install handler
+and CMake install rules; it is not a full ROS/ament build.
 
-Tests cover known planes, roughness, a raised box, mixed ground/obstacle cells,
-empty scans, missing returns, absent ground seeds, sparse and collinear support,
-negative height steps, boundary/nonfinite filtering, scan independence, rigid
-transforms and invalid configuration. Seven additional tests check L1 mounting,
-PM/RM ranges, rate-budget semantics, generated worlds, three noise seeds, and
-the inability of an upright sensor to see flat ground below it. A negative step remains unclassified;
-that test is not a claim of ditch detection.
+The terrain tests cover a known 15-degree ramp, flat/rough surfaces, raised
+obstacles, insufficient observations, occlusion-like holes, invalid values,
+transforms and single-scan independence. The mount helper tests verify that
+blank/nonfinite input is reprompted, existing files are protected and cancelled
+input leaves no partial YAML.
 
-See `offline_validation.json` for machine-readable results and
-`offline_validation.png` for the visualization. Reproduce with
-`scripts/validate_offline.py`.
+Driver tests include cloud/IMU decoding through the bundled SDK, deliberate
+packet corruption, stalled streams, malformed records and competing readers.
+The synthetic fixtures do not establish hardware calibration or power health.
+The original SDK buffering workaround is retained; see the driver package's
+`docs/PREVIOUS_VALIDATION.md` for its rationale.
 
-The single-package conversion was also checked for exactly one package manifest,
-unchanged grid fields, valid Python/XML/YAML, local mesh and documentation links,
-and executable import resolution in staged normal and symlink layouts. Those
-entry-point checks reached the expected missing `rclpy` dependency in this
-environment; they do not establish a successful ROS build or node startup.
+Repeat terrain tests from the terrain package root:
 
-Still required on a machine with ROS 2 Jazzy and Gazebo Harmonic:
+```bash
+OPENBLAS_NUM_THREADS=1 PYTHONPATH=. python3 -m unittest discover -s test -v
+```
 
-- Build the combined ROS package (message generation and Python node) with colcon.
-- Run `demo.launch.py`; confirm GPU LiDAR rendering and point-cloud bridge.
-- Confirm source units, frame, mounting, clock and transform availability.
-- Run the live checker, inspect all RViz layers and capture the requested video.
-- For later rover integration, supply a 3D source and measure its stationary TF.
-- Review the proposed grid contract with the Nav2 member(s).
-- Validate a physical L1 device once its scans and mount calibration exist.
+Repeat native driver tests from the driver package root, without ROS sourced:
 
-No short live screen recording or rosbag was produced here. The recording
-script is supplied for collecting that evidence; no synthetic video is being
-presented as a live demonstration.
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j2
+ctest --test-dir build --output-on-failure
+```
+
+On the Jazzy computer, also run `colcon test --packages-select unitree_l1_driver
+terrain_geometry` and `colcon test-result --verbose` after building. Physical
+acceptance still requires positive raw cloud/IMU data, a measured mounting TF,
+and comparison with a known floor/ramp/raised obstacle. A short real recording
+must be collected there; none is fabricated here.

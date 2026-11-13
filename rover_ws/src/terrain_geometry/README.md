@@ -1,145 +1,117 @@
-# Unitree L1 terrain geometry — one ROS 2 package
+# terrain_geometry — physical terrain only
 
-Drop the **`terrain_geometry` folder directly into your workspace's `src`**.
-This package contains the terrain processor, its custom grid message, Unitree
-L1 simulation settings, test worlds, launch files and RViz configuration.
-It does not require a TAURUS checkout or changes to `rover_description`.
+Subscribes to an already-running PointCloud2 publisher. Calculates a stationary
+grid of ground height, slope, roughness and unknown cells, plus separated ground,
+obstacle and unclassified points. **It never launches a LiDAR driver or opens a
+serial port.** This physical edition has no Gazebo dependencies, worlds or demo
+launch. Your earlier simulation ZIP is retained separately.
 
-## Install and run
+The ROS package and message names remain `terrain_geometry` and
+`terrain_geometry/msg/TerrainGrid`. Replace the older source folder rather than
+keeping two packages with the same name. See [MIGRATION.md](docs/MIGRATION.md).
 
-Prerequisites: Ubuntu 24.04, ROS 2 Jazzy, `colcon` and `rosdep`. The commands
-below install the declared ROS/Gazebo dependencies; Gazebo Harmonic is the
-target simulator. No Unitree hardware driver is needed for the simulated demo.
+## Nav2 integration (v0.5.0)
 
-Extract `terrain_geometry.zip` **into `src`**, so the layout is:
+The optional adapter now feeds the existing DEIMOS nav2 branch costmap interface.
+Use `nav2_adapter:=true` on terrain.launch.py. It publishes `/terrain_cost_grid`
+and a freshness heartbeat. See [NAV2_INTEGRATION.md](docs/NAV2_INTEGRATION.md)
+for the reviewed branch/commit, config generation and required robot inputs.
+The L1 driver remains independent.
 
-```text
-your_workspace/src/terrain_geometry/package.xml
-your_workspace/src/terrain_geometry/CMakeLists.txt
-```
-
-From **your workspace root** (the directory containing `src`):
+## Build independently
 
 ```bash
 source /opt/ros/jazzy/setup.bash
-rosdep update
+cd ~/DEIMOS-ws/rover_ws
 rosdep install --from-paths src/terrain_geometry --ignore-src -r -y --rosdistro jazzy
-colcon build --symlink-install --packages-select terrain_geometry
+colcon build --packages-select terrain_geometry
 source install/setup.bash
-ros2 launch terrain_geometry demo.launch.py
 ```
 
-Use `l1_variant:=RM` for the RM range setting; the default is PM. Add
-`rviz:=false` to omit RViz. The launch starts Gazebo, the cloud/IMU/clock bridge,
-the fixed sensor transforms, the terrain node and RViz. The first demonstration
-uses a stationary sensor with known ground orientation, without SLAM.
+Start `unitree_l1_driver` separately and verify raw points first. Any compatible
+PointCloud2 publisher can be used; there is no dependency on that driver package.
+Runtime input needs x/y/z float fields in metres, a nonempty source frame, stamps
+compatible with the ROS clock, and a valid TF to a gravity-aligned target frame.
+Nonfinite points are filtered before transforms. No IMU attitude estimator is
+included; a tilted sensor frame must not be used as the level reference.
 
-**Replacing the earlier two-package bundle?** Read
-[MIGRATION.md](docs/MIGRATION.md) first to avoid duplicate source packages and
-stale build artifacts. The custom type is now `terrain_geometry/msg/TerrainGrid`.
+## Create measured configuration
 
-## What appears
-
-The world includes real surface geometry: a flat floor, a **15° ramp**, an
-uneven mesh and a **0.7 m raised box**. RViz displays separated ground and
-obstacle points, height/slope/roughness layers, and unknown ground cells.
-
-| Output | Contents |
-|---|---|
-| `/terrain/grid` | Ground height, slope, roughness, status and observation counts |
-| `/terrain/ground_points` | Accepted ground points |
-| `/terrain/obstacle_points` | Raised obstacle evidence |
-| `/terrain/unclassified_points` | Returns without a reliable classification |
-| `/terrain/grid_points` | Known cell centers with slope/roughness visualization fields |
-| `/terrain/unknown_cells` | Gray unknown-ground markers |
-| `/terrain/costmap_preview` | Diagnostic OccupancyGrid; not a Nav2 costmap plugin |
-
-Grid defaults: 0.3 m resolution, 50×40 cells, lower corner `(-6,-6,0)` m,
-level `terrain_map` frame, one replacement snapshot per processed cloud.
-Unknown height/slope/roughness are NaN; slope is stored in radians. The complete
-[Nav2 grid contract](docs/NAV2_GRID_CONTRACT.md) includes timestamps and indexing.
-
-## Check the live demo
-
-In a second terminal, source ROS and this workspace, then run:
+Copy the terrain settings, or keep your already measured/tuned files:
 
 ```bash
-ros2 topic hz /unilidar/cloud
-ros2 run tf2_ros tf2_echo terrain_map unilidar_lidar
-ros2 interface show terrain_geometry/msg/TerrainGrid
-ros2 run terrain_geometry check_demo --seconds 20
+cp -n src/terrain_geometry/config/terrain.yaml ~/l1_terrain.yaml
+ros2 run terrain_geometry create_mount --output ~/l1_mount.yaml
 ```
 
-Expected mount: `(0,0,1.2)` m, roll=180°. The inverted native L1 hemisphere
-faces the ground. The checker compares flat ground, the known ramp, roughness,
-box obstacle evidence and retained unknowns. To capture a bag and screen
-recording, follow [RECORDING.md](docs/RECORDING.md).
+The mount helper asks separately for height, roll, pitch and yaw, rejects blank
+or nonfinite numbers, and refuses to overwrite an existing file unless passed
+`--force`. You can reuse your existing valid mount file instead. Angles are
+radians and height is metres. The target's XY origin is directly below the L1,
+and the floor is z=0. Measure height from the L1 frame origin at its bottom
+mounting surface. Correct x/y manually if using a different world origin.
 
-## Use an existing cloud or a physical L1
+A sensor exactly inverted about its X axis has roll=3.141592653589793,
+pitch=0 and yaw=0. Use that only if it matches the physical installation. Point
+the coverage toward the ground and keep the sensor stationary. A static TF does
+not track rover movement. The template `config/l1_mount.example.yaml` deliberately
+contains nulls for unmeasured height/orientation.
 
-If a sensor already publishes `/unilidar/cloud`, launch only the processor:
+## Start terrain, after the driver
 
 ```bash
 ros2 launch terrain_geometry terrain.launch.py \
-  input_topic:=/unilidar/cloud target_frame:=your_level_frame \
-  use_sim_time:=false config:=/absolute/path/to/your_terrain.yaml
+  mount_file:=$HOME/l1_mount.yaml \
+  config:=$HOME/l1_terrain.yaml
 ```
 
-Copy `config/terrain.yaml` and adjust the known ground seed and grid bounds for
-your installation. Supply a measured TF chain from the cloud frame to the
-gravity-aligned target frame. For an existing simulation use `use_sim_time:=true`.
-The launch does not invent mounting transforms for a rover or physical device.
+Defaults: `input_topic:=/unilidar/cloud`, `target_frame:=terrain_map`,
+`lidar_frame:=unilidar_lidar`, `rviz:=true`. Hardware time is always selected
+(`use_sim_time=false`). With a valid robot TF tree already running, omit
+`mount_file` and set the actual gravity-aligned `target_frame` and source
+`lidar_frame`. Never publish a second transform for an already-owned child frame.
 
-The optional `l1_hardware.launch.py` starts the separately installed official
-Unitree L1 driver as well. That vendor SDK/driver is **not embedded** in this
-single-package simulation bundle. See [UNITREE_L1.md](docs/UNITREE_L1.md).
+The default grid covers x/y=[-6,6) m with 40x40 cells at 0.3 m resolution.
+Processing is capped at 2 Hz and uses only the latest cloud, without accumulation.
+A known ground seed is required: `seed_height` is the floor elevation in the
+level frame, and `seed_x/seed_y/seed_radius` must overlap observed ground. Ground
+absence leaves cells unknown; it does not make obstacles or missing returns safe.
 
-## Tests and validation limits
-
-After building:
+## Observe and verify
 
 ```bash
-colcon test --packages-select terrain_geometry
-colcon test-result --verbose
+timeout 10s ros2 run tf2_ros tf2_echo terrain_map unilidar_lidar
+timeout 10s ros2 topic hz /terrain/grid
+ros2 topic echo /terrain/grid --field status --once
 ```
 
-Or from this source package directory, without ROS:
+RViz starts in `terrain_map`. Ground is green, obstacles red and unclassified
+returns yellow. Unknown ground is gray. Enable height, slope or roughness grid
+layers one at a time to avoid overlapping colors. A disabled raw-cloud display
+is included for input comparison; select your topic there if you changed it.
+
+Use a measured level floor, ramp and raised object to assess real outputs. The
+configured classification slope bound and preview costs are not rover safety
+limits. Unknown cells are expected with sparse scans or occlusion. Inspect the
+mount, seed region and cloud density before adjusting thresholds. Reliable ditch
+detection and material recognition are outside this method.
+
+No input for 5 seconds produces a terminal warning. TF failures or stale/future
+clouds also produce warnings. If you see a missing-serial-port error, it belongs
+to the separate driver. Fix raw data before tuning terrain.
+
+## Record and share
 
 ```bash
-PYTHONPATH=. python3 -m unittest discover -s test -v
-OPENBLAS_NUM_THREADS=1 python3 scripts/validate_offline.py --output /tmp/terrain_offline.json
+ros2 bag record -o l1_terrain_test \
+  /tf /tf_static /unilidar/cloud /unilidar/imu /diagnostics \
+  /terrain/grid /terrain/ground_points /terrain/obstacle_points \
+  /terrain/unclassified_points /terrain/grid_points /terrain/unknown_cells \
+  /terrain_cost_grid /terrain/cost_grid_valid
 ```
 
-The 23 offline tests pass, including PM/RM envelopes, mounting, geometry,
-occlusion and unknown handling. Live colcon/ROS/Gazebo/RViz and physical L1
-tests have not been run in the authoring environment; a live recording is
-still pending. The bundled PNG and JSON are explicitly offline results.
-
-The simulated sensor is a **regular-raster L1 coverage/point-budget
-approximation**, not the L1's exact nonrepeating scan pattern. It uses 240×90
-attempted rays at 1 Hz and chosen synthetic range noise. The IMU is exposed
-but does not estimate terrain orientation. See the L1 notes for all limits.
-
-The processor uses observed ground seeds, neighborhood plane fits and height
-residuals. Missing returns remain unknown. No reliable ditch detection,
-material classification, moving-map accumulation or motion compensation is
-claimed. Grid thresholds need tuning before use with real data.
-
-## Package contents and handoff
-
-`msg/TerrainGrid.msg` is generated by this package's CMake build. The Python
-implementation lives in `terrain_geometry_impl`; executable wrappers and that
-module are installed together under `lib/terrain_geometry`. This keeps the
-implementation separate from ROS's generated `terrain_geometry.msg` namespace.
-No second package or `setup.py` is required.
-
-The included `terrain_rover.sdf` is a terrain-only world for later integration;
-it does not spawn a rover or attach a sensor. Generate source meshes/worlds
-with `python3 scripts/generate_world.py` if the test scene changes.
-
-- [Unitree L1 model and hardware setup](docs/UNITREE_L1.md)
-- [Nav2 grid contract](docs/NAV2_GRID_CONTRACT.md)
-- [Method and primary references](docs/METHOD.md)
-- [Validation results](docs/VALIDATION.md)
-- [Recording checklist](docs/RECORDING.md)
-- [Migration from the earlier bundle](docs/MIGRATION.md)
+Save both YAML files and measured test geometry with the recording. Output stamps
+preserve the cloud header; the included L1 driver uses host receipt time. Nav2
+consumers must expire stale grids after input stops. The proposed contract is in
+[NAV2_GRID_CONTRACT.md](docs/NAV2_GRID_CONTRACT.md); the optional Nav2 adapter is documented above.
+See [VALIDATION.md](docs/VALIDATION.md) for test status and hardware limits.

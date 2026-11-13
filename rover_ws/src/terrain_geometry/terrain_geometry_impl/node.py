@@ -1,4 +1,4 @@
-"""ROS 2 adapter: transform at acquisition time, process, publish one snapshot."""
+"""ROS 2 adapter: transform at the input stamp, process, publish one snapshot."""
 
 from dataclasses import fields
 import math
@@ -20,6 +20,7 @@ from visualization_msgs.msg import Marker
 from terrain_geometry.msg import TerrainGrid
 
 from .core import Config, preview_costs, process, transform_xyz
+from .hardware import finite_xyz
 
 
 class TerrainNode(Node):
@@ -51,6 +52,7 @@ class TerrainNode(Node):
         input_qos = QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT,
                                history=HistoryPolicy.KEEP_LAST)
         output_qos = QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE)
+        self.last_received = time.perf_counter()
         self.latest = None
         self.subscription = self.create_subscription(
             PointCloud2, self.get_parameter('input_topic').value, self.receive, input_qos)
@@ -65,17 +67,22 @@ class TerrainNode(Node):
             f'Using level frame {self.frame}; stationary single-scan mode, no accumulation.')
 
     def receive(self, msg):
+        self.last_received = time.perf_counter()
         self.latest = msg  # Bound latency by keeping the newest cloud only.
 
     def tick(self):
         if self.latest is None:
+            if time.perf_counter() - self.last_received > 5.0:
+                self.get_logger().warning(
+                    "No input cloud received for 5 seconds; check the separate LiDAR driver and input_topic.",
+                    throttle_duration_sec=5.0)
             return
         msg, self.latest = self.latest, None
         start = time.perf_counter()
         stamp = Time.from_msg(msg.header.stamp)
         age = (self.get_clock().now() - stamp).nanoseconds / 1e9
         if age > self.max_age or age < -0.05:
-            self.get_logger().warning('Dropping stale/future cloud; check /clock.', throttle_duration_sec=5.0)
+            self.get_logger().warning('Dropping stale/future cloud; check driver timestamps and use_sim_time.', throttle_duration_sec=5.0)
             return
         if not msg.header.frame_id:
             self.get_logger().warning('Cloud has no frame_id; dropped.', throttle_duration_sec=5.0)
@@ -83,7 +90,7 @@ class TerrainNode(Node):
         try:
             xyz = point_cloud2.read_points_numpy(
                 msg, field_names=('x', 'y', 'z'), skip_nans=True).reshape(-1, 3)
-            xyz = xyz[np.isfinite(xyz).all(axis=1)]
+            xyz = finite_xyz(xyz)
             if msg.header.frame_id != self.frame:
                 tf = self.buffer.lookup_transform(self.frame, msg.header.frame_id, stamp)
                 t, q = tf.transform.translation, tf.transform.rotation
@@ -92,7 +99,7 @@ class TerrainNode(Node):
         except (TransformException, ValueError, AssertionError, KeyError) as exc:
             self.get_logger().warning(f'Cloud dropped: {exc}', throttle_duration_sec=5.0)
             return
-        # Stamp remains the source acquisition time, never the processing time.
+        # Preserve the input header stamp; the driver defines acquisition/receipt semantics.
         header = Header(stamp=msg.header.stamp, frame_id=self.frame)
         info = MapMetaData()
         info.map_load_time = msg.header.stamp

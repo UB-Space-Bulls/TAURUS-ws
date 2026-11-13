@@ -20,10 +20,11 @@ install(DIRECTORY terrain_geometry_impl
   FILES_MATCHING PATTERN "*.py"
   PATTERN "__pycache__" EXCLUDE
 )
-install(PROGRAMS scripts/terrain_node scripts/check_demo
+install(PROGRAMS scripts/terrain_node scripts/create_mount scripts/terrain_cost_adapter scripts/configure_nav2
   DESTINATION lib/${PROJECT_NAME}
+  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
-install(DIRECTORY launch config worlds meshes docs scripts
+install(DIRECTORY launch config docs
   DESTINATION share/${PROJECT_NAME}
   PATTERN "__pycache__" EXCLUDE
 )

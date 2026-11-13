@@ -1,6 +1,6 @@
 # Version 1: fixed, axis-aligned 2.5D grid. Arrays have width*height entries.
 # Index = row_y * info.width + column_x (x increases first).
-# Header stamp is the INPUT cloud acquisition stamp; frame must be level.
+# Header stamp is the INPUT cloud header stamp (acquisition or receipt per driver); frame must be level.
 std_msgs/Header header
 nav_msgs/MapMetaData info
 uint8 GROUND_VALID=1

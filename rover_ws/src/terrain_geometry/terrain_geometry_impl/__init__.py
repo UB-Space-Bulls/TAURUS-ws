@@ -1,1 +1,1 @@
-"""Stationary, gravity-aligned terrain processing for the P3 demonstration."""
+"""Stationary physical terrain processing with a measured level reference."""

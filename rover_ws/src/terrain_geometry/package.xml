@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>terrain_geometry</name>
-  <version>0.2.0</version>
-  <description>Single-package Unitree L1 terrain grid, interfaces and Gazebo demonstration.</description>
+  <version>0.5.0</version>
+  <description>Stationary physical terrain geometry from an existing PointCloud2 stream.</description>
   <maintainer email="june.bang.h@gmail.com">Space Bulls</maintainer>
   <license>Apache-2.0</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
@@ -12,6 +12,7 @@
   <exec_depend>rosidl_default_runtime</exec_depend>
   <exec_depend>rclpy</exec_depend>
   <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>sensor_msgs_py</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
@@ -21,8 +22,6 @@
   <exec_depend>ament_index_python</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
-  <exec_depend>ros_gz_sim</exec_depend>
-  <exec_depend>ros_gz_bridge</exec_depend>
   <exec_depend>rviz2</exec_depend>
   <exec_depend>ros2bag</exec_depend>
   <exec_depend>rosbag2_transport</exec_depend>

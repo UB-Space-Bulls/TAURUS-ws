@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+"""Create a separate real-terrain Nav2 YAML from DEIMOS nav2 branch settings."""
+import argparse
+from pathlib import Path
+import sys
+import yaml
+
+source_root = Path(__file__).resolve().parents[1]
+if (source_root / 'terrain_geometry_impl').is_dir():
+    sys.path.insert(0, str(source_root))
+from terrain_geometry_impl.nav2_config import physical_profile
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--input', help='Defaults to rover_navigation/config/nav2_terrain_params.yaml')
+    parser.add_argument('--output', default='~/nav2_terrain_physical.yaml')
+    parser.add_argument('--use-sim-time', action='store_true')
+    parser.add_argument('--force', action='store_true', help='Replace the generated output file')
+    args = parser.parse_args()
+    try:
+        if args.input:
+            source = Path(args.input).expanduser()
+        else:
+            from ament_index_python.packages import get_package_share_directory
+            source = Path(get_package_share_directory('rover_navigation')) / 'config/nav2_terrain_params.yaml'
+        output = Path(args.output).expanduser()
+        if source.resolve() == output.resolve():
+            parser.error('Choose a separate output file; do not overwrite the team configuration')
+        data = physical_profile(yaml.safe_load(source.read_text()), args.use_sim_time)
+        with output.open('w' if args.force else 'x') as stream:
+            stream.write('# Derived real-terrain profile; review physical footprint and thresholds before navigation.\n')
+            yaml.safe_dump(data, stream, sort_keys=False)
+        print(f'Saved {output}. Start nav2_sim.launch.py with this params_file and matching use_sim_time.')
+        print('Do not run terrain_sim.launch.py: its synthetic publisher conflicts with real terrain.')
+    except (OSError, ValueError, ImportError, LookupError) as exc:
+        parser.error(str(exc))
+
+
+if __name__ == '__main__':
+    main()

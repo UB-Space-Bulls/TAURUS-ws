@@ -1,11 +1,12 @@
+# Starting settings for stationary real L1 data; tune with observed density.
 terrain_geometry:
   ros__parameters:
     input_topic: /unilidar/cloud
     target_frame: terrain_map
-    processing_rate: 1.0
+    processing_rate: 2.0
     max_scan_age: 1.5
     resolution: 0.3
-    width: 50
+    width: 40
     height: 40
     origin_x: -6.0
     origin_y: -6.0
@@ -29,3 +30,4 @@ terrain_geometry:
     min_xy_eigenvalue: 0.0025
     preview_slope_deg: 20.0
     preview_roughness: 0.06
+    use_sim_time: false

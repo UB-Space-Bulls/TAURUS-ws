@@ -47,7 +47,7 @@ Visualization Manager:
     Color: 245; 65; 55
   - Class: rviz_default_plugins/PointCloud2
     Name: Unclassified returns
-    Enabled: false
+    Enabled: true
     Topic:
       Value: /terrain/unclassified_points
       Depth: 1
@@ -83,7 +83,7 @@ Visualization Manager:
     Max Intensity: 1.2
   - Class: rviz_default_plugins/PointCloud2
     Name: Slope grid (degrees)
-    Enabled: true
+    Enabled: false
     Topic: *id001
     Style: Flat Squares
     Size (m): 0.28
@@ -136,6 +136,32 @@ Visualization Manager:
       Reliability Policy: Best Effort
     Alpha: 0.6
     Color Scheme: map
+  - Class: rviz_default_plugins/PointCloud2
+    Name: Raw L1 input (optional)
+    Enabled: false
+    Topic:
+      Value: /unilidar/cloud
+      Depth: 1
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Best Effort
+    Style: Points
+    Size (Pixels): 3
+    Position Transformer: XYZ
+    Color Transformer: FlatColor
+    Color: 150; 170; 200
+    Decay Time: 0
+  - Class: rviz_default_plugins/Map
+    Name: Nav2 terrain cost input
+    Enabled: false
+    Topic:
+      Value: /terrain_cost_grid
+      Depth: 1
+      Durability Policy: Transient Local
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+    Alpha: 0.7
+    Color Scheme: costmap
   Views:
     Current:
       Class: rviz_default_plugins/Orbit

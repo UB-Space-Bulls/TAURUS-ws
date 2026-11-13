@@ -1,9 +1,11 @@
 # Proposed P3 → Nav2 grid contract, version 1
 
 This is an implemented proposal. Agreement with the Nav2 members is **pending**;
-no coordination message has been sent and no Nav2 costmap plugin is included.
+no coordination message has been sent. An optional OccupancyGrid adapter now
+implements the DEIMOS nav2 branch interface using its existing StaticLayer; see
+[NAV2_INTEGRATION.md](NAV2_INTEGRATION.md). No new C++ plugin is included.
 
-The single-package bundle generates this message inside `terrain_geometry`.
+The terrain package generates this message inside `terrain_geometry`.
 Subscribers using the older `terrain_geometry_msgs` type must update their
 imports/dependencies and rebuild; see [MIGRATION.md](MIGRATION.md).
 
@@ -11,17 +13,17 @@ imports/dependencies and rebuild; see [MIGRATION.md](MIGRATION.md).
 |---|---|
 | Topic / message | `/terrain/grid`, `terrain_geometry/msg/TerrainGrid` |
 | Frame | `header.frame_id`; `terrain_map` in the fixed test stand, gravity aligned |
-| Timestamp | Exact input `PointCloud2.header.stamp`, ROS simulation time in Gazebo |
+| Timestamp | Exact input `PointCloud2.header.stamp`; driver-provided ROS time on hardware |
 | Snapshot | Full replacement from one scan; no accumulation and no circular buffer |
-| Dimensions | `info.width=50`, `info.height=40` cells |
+| Dimensions | `info.width=40`, `info.height=40` cells |
 | Resolution | `info.resolution=0.3` m/cell |
 | Origin | `info.origin=(-6,-6,0)` m; lower x/y grid corner, identity quaternion |
-| Bounds | x=[−6,9), y=[−6,6); upper limits are exclusive |
+| Bounds | x=[−6,6), y=[−6,6); upper limits are exclusive |
 | Index order | `k = row_y * width + column_x`; x varies fastest |
 | Cell center | x=origin.x+(column+0.5)·resolution; y=origin.y+(row+0.5)·resolution |
-| Load time | `info.map_load_time` equals acquisition stamp for this snapshot |
+| Load time | `info.map_load_time` equals input header stamp for this snapshot |
 | QoS | Publisher reliable, volatile, keep-last depth 1; subscribe reliable or best effort |
-| Default update | 1 Hz, newest cloud only; actual rate depends on processing capacity |
+| Default update | 2 Hz, newest cloud only; actual rate depends on processing capacity |
 
 Every array has exactly `width*height` entries. The message is a custom simple
 row-major grid, **not** `grid_map_msgs/GridMap`; do not apply grid_map circular
@@ -46,7 +48,7 @@ Adapter behavior to agree before use:
 
 1. Verify frame, array lengths, positive resolution and identity grid orientation.
    Reject stale snapshots and timestamps unexpectedly in the future. A proposed
-   maximum age is 2 seconds **from acquisition**, with a matching simulation clock;
+   maximum age is 2 seconds **from the input header stamp**, in the same ROS clock;
    make the final threshold explicit with the Nav2 owner. Missing new messages
    must not preserve old free space indefinitely. Clear adapter state on a
    clock reset or changed grid geometry.
@@ -63,7 +65,7 @@ Adapter behavior to agree before use:
    when changing resolution. This initial grid has a fixed origin.
 
 `/terrain/costmap_preview` is a diagnostic `nav_msgs/OccupancyGrid`: -1 unknown,
-0 observed below demo thresholds, 100 obstacle or threshold exceedance. Its
+0 observed below preview thresholds, 100 obstacle or threshold exceedance. Its
 default thresholds (20° slope, 0.06 m roughness) are illustrative and uncalibrated.
 It is not a ready-to-use Nav2 layer and is intentionally not published on `/map`.
 
@@ -82,3 +84,5 @@ Original point fields such as ring, intensity and per-point timestamps are not
 preserved in the separated visualization clouds. Subscribe to the source cloud
 for those fields. Excluded/nonfinite/out-of-ROI points appear in none of the
 three separated clouds.
+
+Hardware note: the bench SDK driver uses host-receipt stamps, not sensor acquisition stamps. Source stamp semantics must be recorded by consumers; see `README.md` in the driver package.

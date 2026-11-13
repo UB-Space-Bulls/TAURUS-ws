@@ -1,0 +1,12 @@
+terrain_cost_adapter:
+  ros__parameters:
+    input_topic: /terrain/grid
+    output_topic: /terrain_cost_grid
+    publish_rate: 2.0
+    max_age: 2.0
+    future_tolerance: 0.1
+    # Starting values for a bench demonstration; not certified rover limits.
+    free_slope_deg: 3.0
+    lethal_slope_deg: 20.0
+    free_roughness_m: 0.01
+    lethal_roughness_m: 0.06
