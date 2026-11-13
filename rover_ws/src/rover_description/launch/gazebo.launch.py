@@ -2,10 +2,10 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import Command, PathJoinSubstitution
+from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
@@ -15,7 +15,8 @@ def generate_launch_description():
     pkg_share = FindPackageShare("rover_description")
 
     xacro_file = PathJoinSubstitution([pkg_share, "urdf", "rover.urdf.xacro"])
-    world_file = PathJoinSubstitution([pkg_share, "worlds", "rover_world.sdf"])
+    # Preserve the current test-world default; allow selecting another installed world.
+    world_file = PathJoinSubstitution([pkg_share, "worlds", LaunchConfiguration("world")])
 
     # ParameterValue(..., value_type=str) is required here -- without it,
     # launch_ros tries to auto-detect the parameter type by YAML-parsing the
@@ -70,6 +71,10 @@ def generate_launch_description():
             # onto /tf below so the TF tree gets its odom->base_link edge.
             "/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
             "/odom_tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V",
+
+            #Transfer the simulated IMU and LiDAR measurements from Gazebo into ROS 2
+            "/imu@sensor_msgs/msg/Imu[gz.msgs.IMU",
+            "/lidar/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked",
         ],
         remappings=[("/odom_tf", "/tf")],
         output="screen",
@@ -135,6 +140,7 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
+            DeclareLaunchArgument("world", default_value="second_world.sdf"),
             gz_sim,
             robot_state_publisher,
             spawn_robot,
