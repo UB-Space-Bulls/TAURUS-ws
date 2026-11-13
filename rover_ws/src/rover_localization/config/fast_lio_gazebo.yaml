@@ -9,12 +9,18 @@
     cube_side_length: 100.0
     runtime_pos_log_enable: false
     common:
-      lid_topic: /fast_lio/points
+      lid_topic: /lidar/points
       imu_topic: /imu
       time_sync_en: false
       time_offset_lidar_to_imu: 0.0
     preprocess:
-      lidar_type: 5  # GAZEBO_SNAPSHOT in the recorded upstream patch
+      lidar_type: 5
+      # G#: 5 stand for default process
+      #     1 is specific for Livox Avia
+      #     2 is specific for velodyne
+      #     3 is specific for ouster
+      #     4 is specific for Livox MID-360
+      
       scan_line: 32
       scan_rate: 10
       timestamp_unit: 0

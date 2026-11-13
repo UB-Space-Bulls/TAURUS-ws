@@ -22,8 +22,8 @@
       # ROS 2 topic names from the physical LiDAR and IMU drivers.
       # Example Unitree ROS 2 driver defaults: /unilidar/cloud, /unilidar/imu.
       # Verify with `ros2 topic list -t` rather than assuming these defaults.
-      lid_topic: "REPLACE_WITH_REAL_POINTCLOUD2_TOPIC"
-      imu_topic: "REPLACE_WITH_REAL_IMU_TOPIC"
+      lid_topic: /unilidar/cloud
+      imu_topic: /unilidar/imu
 
       # Prefer synchronized hardware/driver timestamps; turn on software
       # synchronization only after diagnosing why the streams differ.
@@ -35,7 +35,8 @@
       # Must match a handler implemented by your FAST-LIO version.
       # The existing '5' is a Gazebo snapshot handler, not a real-LiDAR type.
       # You may need a Unitree L2-compatible handler or adapter.
-      lidar_type: "REPLACE_WITH_SUPPORTED_LIDAR_TYPE_INTEGER"
+      #lidar_type: "REPLACE_WITH_SUPPORTED_LIDAR_TYPE_INTEGER"
+      lidar_type: 2
       scan_line: "REPLACE_WITH_REAL_SCAN_LINE_COUNT"
       scan_rate: "REPLACE_WITH_REAL_SCAN_RATE_HZ"
       # 0=seconds, 1=milliseconds, 2=microseconds, 3=nanoseconds.
