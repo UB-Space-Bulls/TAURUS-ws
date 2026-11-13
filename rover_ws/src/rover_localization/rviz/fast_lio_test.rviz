@@ -1,0 +1,59 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+Visualization Manager:
+  Class: ""
+  Global Options:
+    Fixed Frame: camera_init
+    Background Color: 40; 40; 40
+    Frame Rate: 30
+  Displays:
+    - Class: rviz_default_plugins/TF
+      Name: Coordinate frames
+      Enabled: true
+      Show Axes: true
+      Show Arrows: true
+      Show Names: true
+      Marker Scale: 0.5
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Registered cloud
+      Enabled: true
+      Topic:
+        Value: /cloud_registered
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 5
+      Size (Pixels): 2
+      Style: Points
+      Color Transformer: AxisColor
+      Position Transformer: XYZ
+    - Class: rviz_default_plugins/Path
+      Name: Estimated trajectory
+      Enabled: true
+      Topic:
+        Value: /path
+        Reliability Policy: Reliable
+        Durability Policy: Volatile
+        Depth: 5
+      Color: 50; 220; 80
+      Line Style: Lines
+      Line Width: 0.03
+    - Class: rviz_default_plugins/Odometry
+      Name: Estimated odometry (optional)
+      Enabled: false
+      Topic:
+        Value: /Odometry
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        Depth: 5
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 12
+      Pitch: 0.6
+      Yaw: 0.8
+      Target Frame: camera_init
+Window Geometry:
+  Width: 1280
+  Height: 800
