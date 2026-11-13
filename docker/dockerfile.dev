@@ -62,6 +62,27 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-jazzy-gz-ros2-control \
     ros-jazzy-teleop-twist-keyboard \
     && rm -rf /var/lib/apt/lists/*
+# -----------------------------------------------------------------------------
+# FAST-LIO / Livox ROS 2 build dependencies
+# -----------------------------------------------------------------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cmake \
+    pkg-config \
+    libeigen3-dev \
+    libpcl-dev \
+    libboost-all-dev \
+    libapr1-dev \
+    python3-dev \
+    python3-matplotlib \
+    python3-vcstool \
+    ros-jazzy-ament-cmake-auto \
+    ros-jazzy-rosidl-default-generators \
+    ros-jazzy-rclcpp-components \
+    ros-jazzy-common-interfaces \
+    ros-jazzy-pcl-ros \
+    ros-jazzy-pcl-conversions \
+    ros-jazzy-tf2-ros \
+    && rm -rf /var/lib/apt/lists/*
 
 # -----------------------------------------------------------------------------
 # Workspace

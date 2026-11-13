@@ -1,0 +1,75 @@
+# IMPORTANT: This file is NOT launch-ready.
+# Replace every REPLACE_WITH_* placeholder using measurements from the actual
+# hardware, driver, and calibration. Some placeholders intentionally have
+# default values that are NOT suitable for real hardware.
+# The Gazebo-only lidar_type: 5
+# (GAZEBO_SNAPSHOT) must NOT be reused on real hardware.
+
+/**:
+  ros__parameters:
+    use_sim_time: false
+
+    # Algorithm tuning: initial simulation values, NOT validated for hardware.
+    feature_extract_enable: false
+    point_filter_num: 1
+    max_iteration: 4
+    filter_size_surf: 0.2
+    filter_size_map: 0.2
+    cube_side_length: 100.0
+    runtime_pos_log_enable: false
+
+    common:
+      # ROS 2 topic names from the physical LiDAR and IMU drivers.
+      # Example Unitree ROS 2 driver defaults: /unilidar/cloud, /unilidar/imu.
+      # Verify with `ros2 topic list -t` rather than assuming these defaults.
+      lid_topic: "REPLACE_WITH_REAL_POINTCLOUD2_TOPIC"
+      imu_topic: "REPLACE_WITH_REAL_IMU_TOPIC"
+
+      # Prefer synchronized hardware/driver timestamps; turn on software
+      # synchronization only after diagnosing why the streams differ.
+      time_sync_en: false
+      # Seconds; set 0.0 ONLY if no offset is needed or has been determined.
+      time_offset_lidar_to_imu: "REPLACE_WITH_CALIBRATED_TIME_OFFSET_SECONDS"
+
+    preprocess:
+      # Must match a handler implemented by your FAST-LIO version.
+      # The existing '5' is a Gazebo snapshot handler, not a real-LiDAR type.
+      # You may need a Unitree L2-compatible handler or adapter.
+      lidar_type: "REPLACE_WITH_SUPPORTED_LIDAR_TYPE_INTEGER"
+      scan_line: "REPLACE_WITH_REAL_SCAN_LINE_COUNT"
+      scan_rate: "REPLACE_WITH_REAL_SCAN_RATE_HZ"
+      # 0=seconds, 1=milliseconds, 2=microseconds, 3=nanoseconds.
+      # Applies to the point-time field expected by the selected handler.
+      timestamp_unit: "REPLACE_WITH_POINT_TIMESTAMP_UNIT_INTEGER"
+      blind: "REPLACE_WITH_MINIMUM_USABLE_RANGE_METERS"
+
+    mapping:
+      # Starting values copied from simulation; tune for the real IMU.
+      acc_cov: 0.1
+      gyr_cov: 0.1
+      b_acc_cov: 0.0001
+      b_gyr_cov: 0.0001
+
+      fov_degree: "REPLACE_WITH_REAL_LIDAR_FIELD_OF_VIEW_DEGREES"
+      det_range: "REPLACE_WITH_REAL_EFFECTIVE_DETECTION_RANGE_METERS"
+
+      # LiDAR pose IN THE IMU FRAME, not necessarily base_link -> lidar_link.
+      # Supply measured translation (meters) and row-major 3x3 rotation matrix.
+      extrinsic_est_en: false
+      extrinsic_T: "REPLACE_WITH_3_ELEMENT_TRANSLATION_ARRAY"
+      extrinsic_R: "REPLACE_WITH_9_ELEMENT_ROTATION_ARRAY"
+
+    publish:
+      path_en: true
+      scan_publish_en: true
+      dense_publish_en: true
+      scan_bodyframe_pub_en: true
+      # These settings are retained from the TAURUS Gazebo config; verify
+      # that your particular FAST-LIO fork recognizes them.
+      map_en: false
+      effect_map_en: false
+
+    # Avoid unbounded point-cloud storage during initial hardware tests.
+    pcd_save:
+      pcd_save_en: false
+      interval: -1

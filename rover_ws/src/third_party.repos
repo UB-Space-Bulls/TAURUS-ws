@@ -1,0 +1,10 @@
+repositories:
+  src/fast_lio:
+    type: git
+    url: https://github.com/Ericsii/FAST_LIO_ROS2.git
+    version: 2fffc570a25d0df172720bac034fbdb6a13d2162
+
+  src/livox_ros_driver2:
+    type: git
+    url: https://github.com/Ericsii/livox_ros_driver2.git
+    version: 378d1c7c9d33ec44d0683aef885b6ed0cce9612c

@@ -68,3 +68,7 @@ Thumbs.db
 *.tmp
 *.swp
 *~
+
+# External ROS 2 source repositories. Avoid pushing whole repo.
+rover_ws/src/fast_lio/
+rover_ws/src/livox_ros_driver2/
