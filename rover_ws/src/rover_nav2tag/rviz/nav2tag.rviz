@@ -1,0 +1,57 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Name: Grid
+      Enabled: true
+      Reference Frame: map
+      Plane Cell Count: 12
+      Cell Size: 1
+      Color: 160; 160; 164
+    - Class: rviz_default_plugins/TF
+      Name: TF
+      Enabled: true
+      Show Names: true
+      Show Axes: true
+      Show Arrows: true
+      Marker Scale: 1
+    - Class: rviz_default_plugins/Pose
+      Name: Nav2 goal
+      Enabled: true
+      Topic:
+        Value: /nav2tag/current_goal
+        Depth: 5
+        Durability Policy: Volatile
+        Reliability Policy: Reliable
+        History Policy: Keep Last
+      Shape: Arrow
+      Color: 255; 25; 0
+      Shaft Length: 0.6
+      Shaft Radius: 0.06
+      Head Length: 0.25
+      Head Radius: 0.12
+  Global Options:
+    Fixed Frame: map
+    Background Color: 48; 48; 48
+    Frame Rate: 15
+  Tools:
+    - Class: rviz_default_plugins/MoveCamera
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 9
+      Focal Point:
+        X: 2.5
+        Y: 1.2
+        Z: 0
+      Pitch: 0.75
+      Yaw: 3.9
+      Target Frame: map
+Window Geometry:
+  Width: 1280
+  Height: 760
+  X: 0
+  Y: 0

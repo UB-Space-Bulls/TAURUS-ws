@@ -77,6 +77,30 @@ def parse_tag_frame_id(frame_name: str, tag_family: str = "tag36h11") -> Optiona
     return None
 
 
+def tag_approach_heading(
+    qx: float, qy: float, qz: float, qw: float, min_horizontal: float = 0.3
+) -> Optional[float]:
+    """
+    Return the map-frame heading (radians) a rover should drive to approach
+    the tag head-on, from the tag's orientation quaternion (map -> tag).
+
+    AprilTag frame convention: x right along the tag face, y down,
+    z pointing INTO the tag (away from whoever is looking at it). So the
+    tag's z-axis, flattened onto the ground plane, is exactly the direction
+    "from the viewer toward the tag". (Using the x-axis here would be wrong:
+    it lies along the tag face, which sends the rover off to the side.)
+
+    Returns None if the z-axis is near-vertical (tag lying flat / facing
+    up or down), since there's no meaningful horizontal approach direction.
+    """
+    # Third column of the rotation matrix = tag z-axis expressed in map frame
+    zx = 2.0 * (qx * qz + qw * qy)
+    zy = 2.0 * (qy * qz - qw * qx)
+    if math.hypot(zx, zy) < min_horizontal:
+        return None
+    return math.atan2(zy, zx)
+
+
 def calculate_standoff_pose(
     tx: float,
     ty: float,
@@ -86,15 +110,18 @@ def calculate_standoff_pose(
 ) -> Tuple[float, float, float, float]:
     """
     Compute the (x, y, qz, qw) 2D goal pose in front of the tag.
-    Stops `stop_distance` in front of the tag along its heading,
-    and rotates the rover so it faces directly toward the tag.
+
+    `yaw` is the approach heading (see `tag_approach_heading`): the direction
+    pointing from the open side of the tag INTO the tag face. The goal sits
+    `stop_distance` back from the tag along that direction, and the rover
+    faces along it — i.e. straight at the tag.
     """
-    # Back up stop_distance along the tag's heading vector
+    # Back up stop_distance from the tag, against the approach direction
     goal_x = tx - stop_distance * math.cos(yaw)
     goal_y = ty - stop_distance * math.sin(yaw)
 
-    # Rover faces the tag: reverse heading + any fine-tuning offset
-    facing_yaw = yaw + math.pi + approach_angle_offset
+    # Rover faces along the approach direction (toward the tag) + fine-tuning offset
+    facing_yaw = yaw + approach_angle_offset
     # Normalize facing_yaw to [-pi, pi]
     facing_yaw = math.atan2(math.sin(facing_yaw), math.cos(facing_yaw))
 
@@ -332,10 +359,14 @@ class NavigateToTag(Node):
         ty = transform.transform.translation.y
 
         q = transform.transform.rotation
-        yaw = math.atan2(
-            2.0 * (q.w * q.z + q.x * q.y),
-            1.0 - 2.0 * (q.y * q.y + q.z * q.z),
-        )
+        yaw = tag_approach_heading(q.x, q.y, q.z, q.w)
+        if yaw is None:
+            self.get_logger().warn(
+                f"{tag_frame} is facing up/down (z-axis near vertical) — "
+                f"no horizontal approach direction, skipping",
+                throttle_duration_sec=3.0,
+            )
+            return
 
         # 4. Calculate standoff goal pose
         goal_x, goal_y, qz, qw = calculate_standoff_pose(
@@ -358,7 +389,7 @@ class NavigateToTag(Node):
         goal.pose.orientation.w = qw
 
         self.get_logger().info(
-            f"Target {tag_frame} at ({tx:.2f}, {ty:.2f}, yaw={math.degrees(yaw):.1f}°) → "
+            f"Target {tag_frame} at ({tx:.2f}, {ty:.2f}, approach heading={math.degrees(yaw):.1f}°) → "
             f"Commanding Nav2 goal at ({goal_x:.2f}, {goal_y:.2f}) "
             f"with standoff {self.stop_distance:.2f}m"
         )

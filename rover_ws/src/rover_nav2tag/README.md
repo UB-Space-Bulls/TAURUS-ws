@@ -60,6 +60,15 @@ Launch both the navigation node and the fake tag publisher:
 ros2 launch rover_nav2tag nav2tag.launch.py launch_fake_tags:=true target_tag_id:=5
 ```
 
+### 2b. Watch it in RViz (one command, any laptop with Docker)
+From the repo root on your host (needs the `rover-dev` image built once):
+```bash
+rover_ws/src/rover_nav2tag/scripts/view_sim.sh       # or: view_sim.sh 3  to target tag 3
+```
+Opens RViz in your browser at http://localhost:6080/vnc.html?autoconnect=1&resize=scale
+showing the fake rover, both tags, and the computed goal (red arrow). No Nav2 runs,
+so nothing drives. Stop with `view_sim.sh stop`.
+
 ### 3. Change the requested tag at runtime
 Via topic:
 ```bash
