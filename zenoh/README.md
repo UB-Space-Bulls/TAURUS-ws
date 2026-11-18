@@ -9,13 +9,6 @@ This directory stores the configurations for the Zenoh routers for each device. 
 | ThinkPad | 192.168.1.51 | Connects to the Orin |
 
 
-The Zenoh routers will be set to do the following:
-
-Base: Connect to orin
-Orin: Wait for connections
-Thinkpad: Connect to orin
-
-
 This will allow all three devices to see each other's ROS topics. 
 
 
