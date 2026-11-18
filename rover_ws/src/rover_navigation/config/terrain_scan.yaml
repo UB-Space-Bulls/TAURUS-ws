@@ -1,0 +1,16 @@
+terrain_scan_converter:
+  ros__parameters:
+    use_sim_time: true
+    target_frame: terrain_sim_lidar
+    transform_tolerance: 0.1
+    # A horizontal obstacle slice relative to the scanner, 1.2 m above the
+    # origin surface. Ground below this slice belongs to terrain perception.
+    min_height: -0.2
+    max_height: 0.5
+    angle_min: -3.141592653589793
+    angle_max: 3.141592653589793
+    angle_increment: 0.008726646259972
+    scan_time: 0.2
+    range_min: 0.1
+    range_max: 30.0
+    use_inf: true

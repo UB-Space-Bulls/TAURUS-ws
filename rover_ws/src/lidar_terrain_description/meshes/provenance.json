@@ -1,0 +1,25 @@
+{
+  "source_filename": "lidar.stl",
+  "source_sha256": "ee2236a407b6526433118c7b0257d0c18d1d990b5bd7e8ecfb50ffe2163d733d",
+  "source_triangles": 8767687,
+  "source_bounds": [
+    [
+      -608.4860229492188,
+      -414.1376953125,
+      -7.229950904846191
+    ],
+    [
+      622.4240112304688,
+      384.7023010253906,
+      18.680082321166992
+    ]
+  ],
+  "source_units": "unknown; default assumes metres",
+  "z_offset_subtracted": -0.8499462008476257,
+  "tile_half_extent_source_units": 30,
+  "tile_triangles": 31578,
+  "overview_triangles": 199999,
+  "overview_method": "quadric edge collapse, target 200000 faces; visual approximation",
+  "transform": "x=x_raw*scale; y=y_raw*scale; z=(z_raw-z_offset)*scale",
+  "tile_method": "unchanged triangles with all vertices inside [-30,30] XY; no hole filling"
+}

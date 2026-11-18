@@ -1,7 +1,9 @@
 import math
+import time
 
 import rclpy
 from geometry_msgs.msg import Twist
+from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 from std_msgs.msg import Float64MultiArray
 
@@ -58,6 +60,11 @@ class SwerveKinematicsNode(Node):
         super().__init__("swerve_kinematics_node")
 
         self._last_steer_angles = {name: 0.0 for name in MODULES}
+        self.declare_parameter('cmd_vel_timeout', 0.5)
+        self._command_timeout = float(self.get_parameter('cmd_vel_timeout').value)
+        if not math.isfinite(self._command_timeout) or self._command_timeout <= 0:
+            raise ValueError('cmd_vel_timeout must be finite and positive')
+        self._last_command_time = time.monotonic()
 
         self.create_subscription(Twist, "cmd_vel", self._cmd_vel_callback, 10)
         self._steer_pub = self.create_publisher(
@@ -66,8 +73,14 @@ class SwerveKinematicsNode(Node):
         self._wheel_pub = self.create_publisher(
             Float64MultiArray, "/wheel_controller/commands", 10
         )
+        self.create_timer(0.1, self._check_command_timeout)
+
+    def _check_command_timeout(self):
+        if time.monotonic() - self._last_command_time > self._command_timeout:
+            self._cmd_vel_callback(Twist())
 
     def _cmd_vel_callback(self, msg: Twist) -> None:
+        self._last_command_time = time.monotonic()
         vx = msg.linear.x
         vy = msg.linear.y
         omega = msg.angular.z
@@ -108,9 +121,12 @@ def main(args=None):
     node = SwerveKinematicsNode()
     try:
         rclpy.spin(node)
+    except (KeyboardInterrupt, ExternalShutdownException):
+        pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":

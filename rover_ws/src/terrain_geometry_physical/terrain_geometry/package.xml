@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>terrain_geometry</name>
-  <version>0.5.0</version>
-  <description>Stationary physical terrain geometry from an existing PointCloud2 stream.</description>
+  <version>0.6.0</version>
+  <description>Terrain geometry from raw or FAST-LIO registered PointCloud2 streams.</description>
   <maintainer email="june.bang.h@gmail.com">Space Bulls</maintainer>
   <license>Apache-2.0</license>
   <buildtool_depend>ament_cmake</buildtool_depend>

@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <robot name="rover" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="terrain_lidar" default="false"/>
+  <xacro:arg name="odometry_dimensions" default="2"/>
 
   <!--
     Chassis geometry (chassis_link + 4x swerve module meshes below) comes
@@ -403,7 +405,7 @@
   <gazebo>
     <plugin filename="gz-sim-odometry-publisher-system"
             name="gz::sim::systems::OdometryPublisher">
-      <dimensions>2</dimensions>
+      <dimensions>$(arg odometry_dimensions)</dimensions>
       <odom_frame>odom</odom_frame>
       <robot_base_frame>base_link</robot_base_frame>
       <odom_publish_frequency>50</odom_publish_frequency>
@@ -441,5 +443,37 @@
       </ray>
     </sensor>
   </gazebo>
+
+  <!-- Optional elevated 3D scanner for the moving terrain simulation. The
+       original horizontal scanner remains the source of /scan. -->
+  <xacro:if value="$(arg terrain_lidar)">
+    <joint name="terrain_lidar_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="terrain_lidar_link"/>
+      <origin xyz="0 0 1.0" rpy="0 0 0"/>
+    </joint>
+    <link name="terrain_lidar_link">
+      <inertial>
+        <mass value="0.1"/>
+        <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+      </inertial>
+      <visual><geometry><cylinder radius="0.04" length="0.06"/></geometry></visual>
+    </link>
+    <gazebo reference="terrain_lidar_link">
+      <sensor name="terrain_lidar" type="gpu_lidar">
+        <topic>/rover/lidar</topic>
+        <gz_frame_id>terrain_lidar_link</gz_frame_id>
+        <always_on>true</always_on>
+        <update_rate>5</update_rate>
+        <lidar>
+          <scan>
+            <horizontal><samples>720</samples><resolution>1</resolution><min_angle>-3.141592653589793</min_angle><max_angle>3.141592653589793</max_angle></horizontal>
+            <vertical><samples>64</samples><resolution>1</resolution><min_angle>-1.5707</min_angle><max_angle>0.261799</max_angle></vertical>
+          </scan>
+          <range><min>0.1</min><max>30</max><resolution>0.01</resolution></range>
+        </lidar>
+      </sensor>
+    </gazebo>
+  </xacro:if>
 
 </robot>

@@ -1,0 +1,156 @@
+Panels:
+- Class: rviz_common/Displays
+  Name: Displays
+- Class: rviz_common/Views
+  Name: Views
+Visualization Manager:
+  Class: ''
+  Global Options:
+    Fixed Frame: mdrs_map
+    Background Color: 30; 35; 43
+    Frame Rate: 30
+  Displays:
+  - Class: rviz_default_plugins/Grid
+    Name: Patch reference grid
+    Enabled: true
+    Reference Frame: mdrs_patch_origin
+    Cell Size: 1
+    Plane Cell Count: 40
+  - Class: rviz_default_plugins/PointCloud2
+    Name: Historical map points (rainbow)
+    Enabled: true
+    Topic:
+      Value: /mdrs/map_patch
+      Depth: 1
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Durability Policy: Volatile
+    Style: Points
+    Size (m): 0.35
+    Position Transformer: XYZ
+    Color Transformer: Intensity
+    Channel Name: z
+    Use rainbow: true
+    Invert Rainbow: false
+    Autocompute Intensity Bounds: true
+    Alpha: 0.35
+    Decay Time: 0
+    Size (Pixels): 3
+  - Class: rviz_default_plugins/PointCloud2
+    Name: Processed ground height (rainbow)
+    Enabled: true
+    Topic:
+      Value: /terrain/grid_points
+      Depth: 1
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Durability Policy: Volatile
+    Style: Spheres
+    Size (m): 0.35
+    Position Transformer: XYZ
+    Color Transformer: Intensity
+    Channel Name: z
+    Use rainbow: true
+    Invert Rainbow: false
+    Autocompute Intensity Bounds: true
+    Alpha: 1
+    Decay Time: 0
+  - Class: rviz_default_plugins/PointCloud2
+    Name: Ground slope (degrees)
+    Enabled: false
+    Topic:
+      Value: /terrain/grid_points
+      Depth: 1
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Durability Policy: Volatile
+    Style: Spheres
+    Size (m): 0.35
+    Position Transformer: XYZ
+    Color Transformer: Intensity
+    Channel Name: slope_deg
+    Use rainbow: true
+    Invert Rainbow: false
+    Autocompute Intensity Bounds: false
+    Alpha: 1
+    Decay Time: 0
+    Min Intensity: 0
+    Max Intensity: 20
+  - Class: rviz_default_plugins/PointCloud2
+    Name: Ground roughness (metres)
+    Enabled: false
+    Topic:
+      Value: /terrain/grid_points
+      Depth: 1
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Durability Policy: Volatile
+    Style: Spheres
+    Size (m): 0.35
+    Position Transformer: XYZ
+    Color Transformer: Intensity
+    Channel Name: roughness_m
+    Use rainbow: true
+    Invert Rainbow: false
+    Autocompute Intensity Bounds: false
+    Alpha: 1
+    Decay Time: 0
+    Min Intensity: 0
+    Max Intensity: 0.06
+  - Class: rviz_default_plugins/PointCloud2
+    Name: Obstacle returns (red)
+    Enabled: true
+    Topic:
+      Value: /terrain/obstacle_points
+      Depth: 1
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Durability Policy: Volatile
+    Style: Points
+    Size (Pixels): 5
+    Position Transformer: XYZ
+    Color Transformer: FlatColor
+    Color: 245; 65; 55
+    Alpha: 1
+    Decay Time: 0
+  - Class: rviz_default_plugins/Marker
+    Name: Unknown ground (gray)
+    Enabled: false
+    Topic:
+      Value: /terrain/unknown_cells
+      Depth: 1
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Durability Policy: Volatile
+  - Class: rviz_default_plugins/Map
+    Name: Diagnostic cost preview
+    Enabled: false
+    Topic:
+      Value: /terrain/costmap_preview
+      Depth: 1
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Durability Policy: Volatile
+    Alpha: 0.65
+    Color Scheme: costmap
+  - Class: rviz_default_plugins/TF
+    Name: Patch coordinate frame
+    Enabled: false
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 36
+      Pitch: 0.9
+      Yaw: 0.6
+      Target Frame: mdrs_patch_origin
+      Focal Point:
+        X: 0
+        Y: 0
+        Z: 0
+  Tools:
+  - Class: rviz_default_plugins/Interact
+  - Class: rviz_default_plugins/MoveCamera
+  - Class: rviz_default_plugins/Select
+Window Geometry:
+  Width: 1280
+  Height: 800

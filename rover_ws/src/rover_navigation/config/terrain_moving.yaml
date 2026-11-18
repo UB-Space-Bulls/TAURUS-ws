@@ -1,0 +1,22 @@
+terrain_geometry:
+  ros__parameters:
+    use_sim_time: true
+    input_topic: /rover/lidar/points
+    target_frame: odom
+    tracking_frame: base_link
+    rolling_window: true
+    level_frame_confirmed: true
+    # CAD wheel center -0.1905 m, radius 0.1016 m below base_link.
+    body_ground_clearance: 0.2921
+    self_filter_radius: 0.65
+    processing_rate: 1.0
+    max_scan_age: 1.5
+    resolution: 0.3
+    width: 40
+    height: 40
+    origin_x: -6.0
+    origin_y: -6.0
+    min_z: -1.0
+    max_z: 3.0
+    seed_radius: 2.4
+    seed_tolerance: 0.15

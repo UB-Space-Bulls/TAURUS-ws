@@ -21,6 +21,7 @@ from terrain_geometry.msg import TerrainGrid
 
 from .core import Config, preview_costs, process, transform_xyz
 from .hardware import finite_xyz
+from .rolling import rolling_config
 
 
 class TerrainNode(Node):
@@ -34,6 +35,9 @@ class TerrainNode(Node):
             'input_topic': '/unilidar/cloud', 'target_frame': 'terrain_map',
             'processing_rate': 1.0, 'max_scan_age': 1.5,
             'preview_slope_deg': 20.0, 'preview_roughness': 0.06,
+            'rolling_window': False, 'tracking_frame': 'body',
+            'body_ground_clearance': 0.0, 'level_frame_confirmed': False,
+            'self_filter_radius': 0.0,
         }.items():
             self.declare_parameter(name, value)
         self.frame = self.get_parameter('target_frame').value
@@ -47,6 +51,18 @@ class TerrainNode(Node):
             raise ValueError('max_scan_age must be finite and positive')
         if not (0 < self.preview_slope < 90 and self.preview_roughness > 0):
             raise ValueError('invalid preview thresholds')
+        self.rolling = self.get_parameter('rolling_window').value
+        self.tracking_frame = self.get_parameter('tracking_frame').value
+        self.clearance = float(self.get_parameter('body_ground_clearance').value)
+        self.self_filter_radius = float(self.get_parameter('self_filter_radius').value)
+        if not math.isfinite(self.self_filter_radius) or self.self_filter_radius < 0:
+            raise ValueError('self_filter_radius must be finite and nonnegative')
+        if self.rolling:
+            if not self.get_parameter('level_frame_confirmed').value:
+                raise ValueError('Confirm a gravity-aligned target_frame before enabling rolling_window')
+            if not self.tracking_frame or self.tracking_frame == self.frame:
+                raise ValueError('tracking_frame must be a distinct moving body/IMU frame')
+            rolling_config(self.cfg, (0., 0., 0.), self.clearance)
         self.buffer = Buffer(cache_time=Duration(seconds=10))
         self.listener = TransformListener(self.buffer, self)
         input_qos = QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT,
@@ -64,7 +80,7 @@ class TerrainNode(Node):
         self.preview_pub = self.create_publisher(OccupancyGrid, '/terrain/costmap_preview', output_qos)
         self.timer = self.create_timer(1.0 / rate, self.tick)
         self.get_logger().info(
-            f'Using level frame {self.frame}; stationary single-scan mode, no accumulation.')
+            f'Using level frame {self.frame}; rolling={self.rolling}; one scan, no accumulation.')
 
     def receive(self, msg):
         self.last_received = time.perf_counter()
@@ -81,6 +97,9 @@ class TerrainNode(Node):
         start = time.perf_counter()
         stamp = Time.from_msg(msg.header.stamp)
         age = (self.get_clock().now() - stamp).nanoseconds / 1e9
+        if stamp.nanoseconds == 0:
+            self.get_logger().warning('Zero-stamped cloud dropped; exact acquisition time is required.', throttle_duration_sec=5.0)
+            return
         if age > self.max_age or age < -0.05:
             self.get_logger().warning('Dropping stale/future cloud; check driver timestamps and use_sim_time.', throttle_duration_sec=5.0)
             return
@@ -95,7 +114,18 @@ class TerrainNode(Node):
                 tf = self.buffer.lookup_transform(self.frame, msg.header.frame_id, stamp)
                 t, q = tf.transform.translation, tf.transform.rotation
                 xyz = transform_xyz(xyz, [t.x, t.y, t.z], [q.x, q.y, q.z, q.w])
-            result = process(xyz, self.cfg)
+            cfg = self.cfg
+            if self.rolling or self.self_filter_radius > 0:
+                body_tf = self.buffer.lookup_transform(self.frame, self.tracking_frame, stamp)
+                body = body_tf.transform.translation
+                if self.self_filter_radius > 0:
+                    # Remove returns inside the rover's horizontal body envelope.
+                    # This discards points; it never labels missing ground free.
+                    outside = np.hypot(xyz[:, 0] - body.x, xyz[:, 1] - body.y)
+                    xyz = xyz[outside > self.self_filter_radius]
+            if self.rolling:
+                cfg = rolling_config(self.cfg, (body.x, body.y, body.z), self.clearance)
+            result = process(xyz, cfg)
         except (TransformException, ValueError, AssertionError, KeyError) as exc:
             self.get_logger().warning(f'Cloud dropped: {exc}', throttle_duration_sec=5.0)
             return
@@ -103,9 +133,9 @@ class TerrainNode(Node):
         header = Header(stamp=msg.header.stamp, frame_id=self.frame)
         info = MapMetaData()
         info.map_load_time = msg.header.stamp
-        info.resolution = float(self.cfg.resolution)
-        info.width, info.height = self.cfg.width, self.cfg.height
-        info.origin.position.x, info.origin.position.y = self.cfg.origin_x, self.cfg.origin_y
+        info.resolution = float(cfg.resolution)
+        info.width, info.height = cfg.width, cfg.height
+        info.origin.position.x, info.origin.position.y = cfg.origin_x, cfg.origin_y
         info.origin.orientation.w = 1.0
         grid = TerrainGrid(header=header, info=info)
         for name, values in (
@@ -121,8 +151,8 @@ class TerrainNode(Node):
             self.cloud_pubs[name].publish(cloud)
         rows, cols = np.nonzero(result.status & 1)
         grid_xyz = np.column_stack((
-            self.cfg.origin_x + (cols + 0.5) * self.cfg.resolution,
-            self.cfg.origin_y + (rows + 0.5) * self.cfg.resolution,
+            cfg.origin_x + (cols + 0.5) * cfg.resolution,
+            cfg.origin_y + (rows + 0.5) * cfg.resolution,
             result.height[rows, cols], np.degrees(result.slope[rows, cols]),
             result.roughness[rows, cols])).astype(np.float32)
         cloud_fields = [PointField(name=name, offset=4*i, datatype=PointField.FLOAT32, count=1)
@@ -130,15 +160,15 @@ class TerrainNode(Node):
         self.cloud_pubs['grid'].publish(point_cloud2.create_cloud(header, cloud_fields, grid_xyz))
         unknown = Marker(header=header, ns='unknown', id=0, type=Marker.CUBE_LIST, action=Marker.ADD)
         unknown.pose.orientation.w = 1.0
-        unknown.scale.x = unknown.scale.y = self.cfg.resolution * 0.95
+        unknown.scale.x = unknown.scale.y = cfg.resolution * 0.95
         unknown.scale.z = 0.012
         unknown.color.r = unknown.color.g = unknown.color.b = 0.45
         unknown.color.a = 0.28
         unknown.lifetime = Duration(seconds=self.max_age).to_msg()
         rows, cols = np.nonzero((result.status & 1) == 0)
-        unknown.points = [Point(x=float(self.cfg.origin_x + (x+0.5)*self.cfg.resolution),
-                                y=float(self.cfg.origin_y + (y+0.5)*self.cfg.resolution),
-                                z=float(self.cfg.seed_height - 0.025))
+        unknown.points = [Point(x=float(cfg.origin_x + (x+0.5)*cfg.resolution),
+                                y=float(cfg.origin_y + (y+0.5)*cfg.resolution),
+                                z=float(cfg.seed_height - 0.025))
                           for y, x in zip(rows, cols)]
         self.unknown_pub.publish(unknown)
         preview = OccupancyGrid(header=header, info=info)

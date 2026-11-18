@@ -77,3 +77,22 @@ terrain_geometry` and `colcon test-result --verbose` after building. Physical
 acceptance still requires positive raw cloud/IMU data, a measured mounting TF,
 and comparison with a known floor/ramp/raised obstacle. A short real recording
 must be collected there; none is fabricated here.
+
+## v0.6.0 FAST-LIO and MDRS checks (14 November 2026)
+
+- **47 offline tests passed** with `PYTHONPATH=. PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest test -q`.
+- New regressions cover translated ramp invariance (including elevation), moving
+  grid origin/seed, invalid poses/clearance, height-band validation and unknown
+  space. Existing raw terrain, mount and Nav2 adapter tests remain passing.
+- All Python modules and launch files compile. This is not a ROS launch/runtime test.
+- Downloaded 3,439,281 real MDRS-area points from 131 USGS EPT nodes; no LAZ download
+  from the obsolete catalog URLs is assumed to have succeeded.
+- Verified finite local bounds, classification equality and point counts between
+  NPZ and LAZ, compound horizontal/vertical CRS, and valid retained return numbers.
+  Maximum XYZ LAZ↔NPZ round-trip difference: 0.000500 m (millimetre quantization).
+- Ran the existing terrain algorithm on three actual 24×24 m patches at 0.6 m
+  resolution. North: 1242/1600 known cells, median slope 4.09°; west: 323/1600,
+  9.94°, 41 predicted obstacle cells; hab south: 0/1600, retained as an unsupported
+  ground-seed example. These outputs are not independent accuracy/traversability validation.
+- ROS 2, Gazebo, RViz, live TF synchronization, Nav2 operation and the physical
+  L1/FAST-LIO pipeline are **not runtime-tested** in this environment.

@@ -1,10 +1,21 @@
-# terrain_geometry — physical terrain only
+# terrain_geometry — raw LiDAR and FAST-LIO terrain
 
-Subscribes to an already-running PointCloud2 publisher. Calculates a stationary
-grid of ground height, slope, roughness and unknown cells, plus separated ground,
-obstacle and unclassified points. **It never launches a LiDAR driver or opens a
-serial port.** This physical edition has no Gazebo dependencies, worlds or demo
-launch. Your earlier simulation ZIP is retained separately.
+Computes ground height, slope, roughness, obstacles and unknown cells from an
+existing PointCloud2 stream. The original stationary L1 mode remains available.
+Version 0.6 adds a moving window driven by FAST-LIO's registered scan and scan-time
+body TF, plus an offline MDRS map-patch preview. It never launches a LiDAR driver.
+
+- **FAST-LIO integration:** [setup, frames and launch commands](docs/FASTLIO_INTEGRATION.md).
+  Place this folder at `DEIMOS-ws/rover_ws/src/terrain_geometry`.
+- **MDRS terrain data:** [dataset and offline preview](docs/MDRS_TESTING.md).
+  Download/extract the companion `mdrs_terrain_data.zip` outside the workspace's `src`.
+  Use `ros2 launch terrain_geometry site_view.launch.py` for the generated
+  `~/mdrs_site/my_patch/patch.yaml`: it opens a centered RViz view. Add
+  `test_duration:=15` for a finite test that closes automatically.
+- **STL area and rainbow terrain view:** [RViz usage guide](README_RVIZ_TERRAIN.md).
+  Launch with `rviz_view:=terrain`, or load the preset in an existing RViz window.
+- **Stationary physical L1:** the instructions below still apply. Keep the separate
+  `unitree_l1_driver` and your measured calibration.
 
 The ROS package and message names remain `terrain_geometry` and
 `terrain_geometry/msg/TerrainGrid`. Replace the older source folder rather than

@@ -1,0 +1,19 @@
+terrain_geometry:
+  ros__parameters:
+    input_topic: /cloud_registered
+    target_frame: camera_init
+    tracking_frame: body
+    rolling_window: true
+    level_frame_confirmed: false
+    body_ground_clearance: 0.0
+    processing_rate: 2.0
+    max_scan_age: 1.5
+    resolution: 0.3
+    width: 40
+    height: 40
+    origin_x: -6.0
+    origin_y: -6.0
+    min_z: -1.0
+    max_z: 3.0
+    seed_radius: 2.4
+    seed_tolerance: 0.08

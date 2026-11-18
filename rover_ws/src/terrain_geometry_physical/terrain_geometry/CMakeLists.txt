@@ -20,7 +20,7 @@ install(DIRECTORY terrain_geometry_impl
   FILES_MATCHING PATTERN "*.py"
   PATTERN "__pycache__" EXCLUDE
 )
-install(PROGRAMS scripts/terrain_node scripts/create_mount scripts/terrain_cost_adapter scripts/configure_nav2
+install(PROGRAMS scripts/terrain_node scripts/create_mount scripts/terrain_cost_adapter scripts/configure_nav2 scripts/site_patch_publisher
   DESTINATION lib/${PROJECT_NAME}
   PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
@@ -28,7 +28,7 @@ install(DIRECTORY launch config docs
   DESTINATION share/${PROJECT_NAME}
   PATTERN "__pycache__" EXCLUDE
 )
-install(FILES README.md DESTINATION share/${PROJECT_NAME})
+install(FILES README.md README_RVIZ_TERRAIN.md DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_cmake_pytest REQUIRED)

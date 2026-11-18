@@ -2,10 +2,11 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler
+from launch.conditions import IfCondition
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import Command, PathJoinSubstitution
+from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitution, PythonExpression
 from launch_ros.actions import Node
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
@@ -15,7 +16,7 @@ def generate_launch_description():
     pkg_share = FindPackageShare("rover_description")
 
     xacro_file = PathJoinSubstitution([pkg_share, "urdf", "rover.urdf.xacro"])
-    world_file = PathJoinSubstitution([pkg_share, "worlds", "rover_world.sdf"])
+    world_file = LaunchConfiguration('world')
 
     # ParameterValue(..., value_type=str) is required here -- without it,
     # launch_ros tries to auto-detect the parameter type by YAML-parsing the
@@ -24,7 +25,9 @@ def generate_launch_description():
     # before robot_state_publisher ever starts.
     robot_description = {
         "robot_description": ParameterValue(
-            Command(["xacro ", xacro_file]), value_type=str
+            Command(["xacro ", xacro_file, ' terrain_lidar:=', LaunchConfiguration('terrain_lidar'),
+                     ' odometry_dimensions:=', LaunchConfiguration('odometry_dimensions')]),
+            value_type=str
         )
     }
 
@@ -34,7 +37,9 @@ def generate_launch_description():
                 get_package_share_directory("ros_gz_sim"), "launch", "gz_sim.launch.py"
             )
         ),
-        launch_arguments={"gz_args": [world_file, " -r"]}.items(),
+        launch_arguments={"gz_args": [world_file, " -r",
+            PythonExpression(["' -s' if '", LaunchConfiguration('gui'), "' == 'false' else ''"]),
+            PythonExpression(["' --headless-rendering' if '", LaunchConfiguration('headless_rendering'), "' == 'true' else ''"])]}.items(),
     )
 
     # use_sim_time is essential here: without it robot_state_publisher stamps
@@ -53,9 +58,17 @@ def generate_launch_description():
     spawn_robot = Node(
         package="ros_gz_sim",
         executable="create",
-        arguments=["-topic", "robot_description", "-name", "rover", "-z", "0.3"],
+        arguments=["-topic", "robot_description", "-name", "rover",
+                   '-x', LaunchConfiguration('spawn_x'), '-y', LaunchConfiguration('spawn_y'),
+                   '-z', LaunchConfiguration('spawn_z')],
         output="screen",
     )
+
+    cloud_bridge = Node(
+        package='ros_gz_bridge', executable='parameter_bridge',
+        condition=IfCondition(LaunchConfiguration('terrain_lidar')),
+        arguments=['/rover/lidar/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked'],
+        parameters=[{'use_sim_time': True}], output='screen')
 
     gz_bridge = Node(
         package="ros_gz_bridge",
@@ -135,10 +148,20 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
+            DeclareLaunchArgument('world', default_value=PathJoinSubstitution([
+                pkg_share, 'worlds', 'rover_world.sdf'])),
+            DeclareLaunchArgument('gui', default_value='true', choices=['true', 'false']),
+            DeclareLaunchArgument('headless_rendering', default_value='false', choices=['true', 'false']),
+            DeclareLaunchArgument('terrain_lidar', default_value='false', choices=['true', 'false']),
+            DeclareLaunchArgument('odometry_dimensions', default_value='2', choices=['2', '3']),
+            DeclareLaunchArgument('spawn_x', default_value='0.0'),
+            DeclareLaunchArgument('spawn_y', default_value='0.0'),
+            DeclareLaunchArgument('spawn_z', default_value='0.3'),
             gz_sim,
             robot_state_publisher,
             spawn_robot,
             gz_bridge,
+            cloud_bridge,
             delay_joint_state_broadcaster_after_spawn,
             delay_module_controllers_after_joint_state_broadcaster,
             swerve_kinematics_node,

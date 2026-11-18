@@ -1,0 +1,104 @@
+Panels:
+- Class: rviz_common/Displays
+  Name: Displays
+Visualization Manager:
+  Class: ''
+  Global Options:
+    Fixed Frame: terrain_map
+    Background Color: 35; 40; 48
+    Frame Rate: 30
+  Displays:
+  - Class: rviz_default_plugins/Grid
+    Name: Reference grid
+    Enabled: true
+    Cell Size: 1
+    Plane Cell Count: 80
+  - Class: rviz_default_plugins/Marker
+    Name: STL terrain
+    Enabled: true
+    Topic:
+      Value: /terrain_scene/mesh
+      Depth: 1
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Durability Policy: Transient Local
+  - Class: rviz_default_plugins/PointCloud2
+    Name: Simulated returns
+    Enabled: true
+    Topic:
+      Value: /sim/terrain/cloud
+      Depth: 1
+      History Policy: Keep Last
+      Reliability Policy: Best Effort
+      Durability Policy: Volatile
+    Style: Points
+    Size (Pixels): 3
+    Position Transformer: XYZ
+    Color Transformer: AxisColor
+    Axis: Z
+    Decay Time: 0
+  - Class: rviz_default_plugins/TF
+    Name: Frames
+    Enabled: false
+  - Class: rviz_default_plugins/Map
+    Name: Terrain costs
+    Enabled: true
+    Alpha: 0.65
+    Color Scheme: costmap
+    Draw Behind: false
+    Topic:
+      Value: /terrain_cost_grid
+      Depth: 1
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Durability Policy: Transient Local
+  - Class: rviz_default_plugins/Map
+    Name: Global costmap
+    Enabled: false
+    Alpha: 0.65
+    Color Scheme: costmap
+    Draw Behind: false
+    Topic:
+      Value: /global_costmap/costmap
+      Depth: 1
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Durability Policy: Transient Local
+  - Class: rviz_default_plugins/Map
+    Name: Local costmap
+    Enabled: false
+    Alpha: 0.65
+    Color Scheme: costmap
+    Draw Behind: false
+    Topic:
+      Value: /local_costmap/costmap
+      Depth: 1
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Durability Policy: Transient Local
+  - Class: rviz_default_plugins/LaserScan
+    Name: Obstacle scan
+    Enabled: false
+    Topic:
+      Value: /scan
+      Reliability Policy: Best Effort
+      Durability Policy: Volatile
+      Depth: 1
+    Size (Pixels): 4
+    Style: Points
+    Position Transformer: XYZ
+    Color Transformer: FlatColor
+    Color: 255; 80; 60
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 20
+      Pitch: 0.7
+      Yaw: 0.6
+      Focal Point:
+        X: 0
+        Y: 0
+        Z: 0
+Window Geometry:
+  Width: 1280
+  Height: 800
