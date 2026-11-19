@@ -1,0 +1,11 @@
+# Pins used by DEIMOS localization/fast-lio at 7295ce36432453ebddb38e30611daf3bf9fc75f1.
+# Import from the rover_ws directory: vcs import --recursive . < fast_lio.repos
+repositories:
+  src/fast_lio:
+    type: git
+    url: https://github.com/Ericsii/FAST_LIO_ROS2.git
+    version: 2fffc570a25d0df172720bac034fbdb6a13d2162
+  src/livox_ros_driver2:
+    type: git
+    url: https://github.com/Ericsii/livox_ros_driver2.git
+    version: 378d1c7c9d33ec44d0683aef885b6ed0cce9612c

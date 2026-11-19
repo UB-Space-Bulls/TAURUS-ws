@@ -2,7 +2,9 @@
 
 Runs the supplied Unitree L1 SDK through a supervised native reader. Publishes raw
 PointCloud2, IMU and diagnostics, with optional RViz. No terrain processing,
-Gazebo, map, ground mount or pose estimator is started. Linux x86_64 and aarch64
+Gazebo, map, ground mount or pose estimator is started by `l1.launch.py`. The
+optional [physical FAST-LIO test](docs/FAST_LIO_L1_TESTING.md) has its own launch
+and starting configuration. Linux x86_64 and aarch64
 SDK archives are included; see `vendor/LICENSE` and `vendor/UPSTREAM_README.md`.
 
 ## Build
@@ -54,7 +56,9 @@ device, and is readable/writable before starting RViz. It does not automatically
 choose among USB devices. The native reader opens at 2,000,000 baud and retains
 the SDK and buffering workaround from your existing test package.
 
-Arguments: `port`, `cloud_scan_num:=18`, `rviz:=true`, `publish_imu_tf:=true`.
+Arguments: `port`, `cloud_scan_num:=18`, `rviz:=true`, `publish_imu_tf:=true`,
+`profile:=bench`. The optional `profile:=fastlio` uses SDK stamps and timed
+UINT16-ring clouds; use the dedicated test guide before selecting it.
 Use `rviz:=false` when the terrain package will provide the visualization.
 For stationary terrain testing, `cloud_scan_num:=90` produces larger batches
 with more latency. This batches sensor scans; it does not estimate motion.
@@ -72,7 +76,7 @@ that edge. There is no `terrain_map` transform in this package.
 | `/unilidar/imu_orientation` | PoseStamped for diagnostic display, not odometry |
 | `/diagnostics` | DiagnosticArray; reader, cloud and IMU stream health |
 
-Cloud and IMU QoS are Best Effort/Volatile. Headers use host receipt time with
+Cloud and IMU QoS are Best Effort/Volatile. In the default bench profile, headers use host receipt time with
 `use_sim_time=false`; they are not hardware acquisition timestamps. The driver
 reports `power_verified=false`; no voltage/current/battery charge measurement is
 inferred from motor rotation or received data.

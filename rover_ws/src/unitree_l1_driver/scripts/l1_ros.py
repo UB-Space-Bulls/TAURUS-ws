@@ -12,6 +12,7 @@ from sensor_msgs.msg import PointCloud2, PointField, Imu
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 from geometry_msgs.msg import PoseStamped
 from l1_common import Health, Worker, valid_imu, worker_path
+from l1_fastlio import SDKClock, timed_cloud
 
 
 class L1Node(Node):
@@ -21,6 +22,10 @@ class L1Node(Node):
         scans = self.declare_parameter('cloud_scan_num', 18).value
         self.warmup = self.declare_parameter('warmup_seconds', 10.0).value
         self.stall = self.declare_parameter('stall_timeout', 3.0).value
+        self.profile = self.declare_parameter('profile', 'bench').value
+        if self.profile not in ('bench', 'fastlio'):
+            raise ValueError('profile must be bench or fastlio')
+        self.sdk_clock = SDKClock()
         if not 1 <= scans <= 180 or self.warmup < 0 or self.stall <= 0:
             raise ValueError('Invalid scan count/warmup/stall timeout')
         self.cloud_pub = self.create_publisher(PointCloud2, '/unilidar/cloud', qos_profile_sensor_data)
@@ -37,7 +42,8 @@ class L1Node(Node):
         self.last_diag = self.started
         self.create_timer(0.001, self.pump)
         self.create_timer(1.0, self.diagnose)
-        self.get_logger().info(f'Opening {port}; cloud_scan_num={scans}. Host receipt stamps; no SLAM.')
+        clock = 'SDK timestamps and timed UINT16-ring clouds' if self.profile == 'fastlio' else 'Host receipt stamps'
+        self.get_logger().info(f'Opening {port}; cloud_scan_num={scans}. {clock}.')
 
     def pump(self):
         if self.failed:
@@ -53,18 +59,23 @@ class L1Node(Node):
                     self.health.add(event, now_mono)
                 now_ros = self.get_clock().now()
                 stamp = now_ros.to_msg()
+                if self.profile == 'fastlio' and event['type'] in ('cloud', 'imu'):
+                    stamp_ns = self.sdk_clock.stamp_ns(event['type'], event.get('stamp'), now_ros.nanoseconds)
+                    stamp.sec, stamp.nanosec = divmod(stamp_ns, 1_000_000_000)
                 if event['type'] == 'cloud':
                     msg = PointCloud2()
                     msg.header.frame_id = 'unilidar_lidar'
                     msg.header.stamp = stamp
                     msg.height, msg.width = 1, len(event['points'])
                     msg.fields = [PointField(name=n, offset=i*4,
-                        datatype=PointField.UINT32 if n == 'ring' else PointField.FLOAT32, count=1)
+                        datatype=(PointField.UINT16 if self.profile == 'fastlio' else PointField.UINT32)
+                        if n == 'ring' else PointField.FLOAT32, count=1)
                         for i, n in enumerate(('x', 'y', 'z', 'intensity', 'time', 'ring'))]
                     msg.is_bigendian, msg.is_dense = False, True
                     msg.point_step = 24
                     msg.row_step = 24*msg.width
-                    msg.data = b''.join(struct.pack('<5fI', *point) for point in event['points'])
+                    msg.data = (timed_cloud(event['points']) if self.profile == 'fastlio' else
+                                b''.join(struct.pack('<5fI', *point) for point in event['points']))
                     self.cloud_pub.publish(msg)
                 elif event['type'] == 'imu' and valid_imu(event):
                     msg = Imu()
@@ -73,8 +84,8 @@ class L1Node(Node):
                     q = event['q']
                     norm = math.sqrt(sum(x*x for x in q))
                     msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w = [x/norm for x in q]
-                    msg.angular_velocity.x, msg.angular_velocity.y, msg.angular_velocity.z = event['gyro']
-                    msg.linear_acceleration.x, msg.linear_acceleration.y, msg.linear_acceleration.z = event['accel']
+                    msg.angular_velocity.x, msg.angular_velocity.y, msg.angular_velocity.z = map(float, event['gyro'])
+                    msg.linear_acceleration.x, msg.linear_acceleration.y, msg.linear_acceleration.z = map(float, event['accel'])
                     # All-zero covariance means covariance unknown, not perfect certainty.
                     self.imu_pub.publish(msg)
                     pose = PoseStamped()
@@ -112,6 +123,7 @@ class L1Node(Node):
             status.message = 'Cumulative data check passed' if report['passed'] else 'Data check needs attention'
             status.values = [KeyValue(key=k, value=json.dumps(v, allow_nan=False)) for k, v in report.items()]
         status.values += [KeyValue(key='power_verified', value='false'),
+                          KeyValue(key='profile', value=self.profile),
                           KeyValue(key='malformed_worker_records', value=str(self.worker.malformed))]
         if self.worker.malformed:
             status.level, status.message = DiagnosticStatus.ERROR, 'Malformed worker records'

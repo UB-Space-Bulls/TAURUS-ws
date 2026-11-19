@@ -1,0 +1,55 @@
+# Unitree L1 with its integrated IMU and cloud_scan_num:=18.
+# Reference: https://github.com/unitreerobotics/point_lio_unilidar/blob/main/config/unilidar_l1.yaml
+# Requires the driver's profile:=fastlio and the recorded FAST-LIO IMU QoS patch.
+/**:
+  ros__parameters:
+    use_sim_time: false
+    feature_extract_enable: false
+    point_filter_num: 1
+    max_iteration: 4
+    filter_size_surf: 0.2
+    filter_size_map: 0.2
+    cube_side_length: 100.0
+    runtime_pos_log_enable: false
+
+    common:
+      lid_topic: /unilidar/cloud
+      imu_topic: /unilidar/imu
+      # Both subscriptions must accept Best Effort sensor data.
+      # SDK cloud stamps are the origin of the preserved relative point times.
+      # Check actual SDK LiDAR/IMU alignment on hardware before relying on deskew.
+      time_sync_en: false
+      time_offset_lidar_to_imu: 0.0  # Starting value, not a measured calibration.
+
+    preprocess:
+      # Type 2 reads FLOAT32 time and UINT16 ring. The fastlio driver profile
+      # provides this layout and orders points by scan-relative time.
+      lidar_type: 2
+      scan_line: 18
+      scan_rate: 10  # Approximate cloud rate at 18 scans/batch, not laser count.
+      timestamp_unit: 0  # Seconds.
+      blind: 0.5
+
+    mapping:
+      acc_cov: 0.1
+      gyr_cov: 0.1
+      b_acc_cov: 0.0001
+      b_gyr_cov: 0.0001
+      fov_degree: 180.0  # This FAST-LIO version caps its internal FOV at 179.9.
+      det_range: 10.0  # Indoor starting value; tune against observed data.
+      extrinsic_est_en: false
+      # LiDAR origin in the integrated IMU frame, metres; axes are parallel.
+      extrinsic_T: [0.007698, 0.014655, -0.00667]
+      extrinsic_R: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+
+    publish:
+      path_en: true
+      scan_publish_en: true
+      dense_publish_en: true
+      scan_bodyframe_pub_en: true
+      map_en: false
+      effect_map_en: false
+
+    pcd_save:
+      pcd_save_en: false
+      interval: -1

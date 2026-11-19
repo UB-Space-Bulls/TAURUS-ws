@@ -29,7 +29,8 @@ def setup(context):
         raise ValueError('cloud_scan_num must be in [1, 180]')
     actions = [Node(package='unitree_l1_driver', executable='l1_ros.py',
                     output='screen', parameters=[{'port': port,
-                    'cloud_scan_num': scans, 'use_sim_time': False}])]
+                    'cloud_scan_num': scans, 'use_sim_time': False,
+                    'profile': value('profile')}])]
     if value('publish_imu_tf') == 'true':
         actions.append(Node(package='tf2_ros', executable='static_transform_publisher',
             name='l1_imu_static_tf', arguments=[
@@ -54,6 +55,7 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument('port', default_value='/dev/ttyUSB0'),
         DeclareLaunchArgument('cloud_scan_num', default_value='18'),
+        DeclareLaunchArgument('profile', default_value='bench', choices=['bench', 'fastlio']),
         DeclareLaunchArgument('rviz', default_value='true', choices=['true', 'false']),
         DeclareLaunchArgument('publish_imu_tf', default_value='true', choices=['true', 'false']),
         OpaqueFunction(function=setup),
