@@ -24,22 +24,29 @@ from rover_nav2tag.nav2tag_node import (
     parse_tag_frame_id,
     calculate_standoff_pose,
     tag_approach_heading,
+    is_detection_fresh,
 )
 
 
 class TestTagParsing(unittest.TestCase):
-    def test_standard_apriltag_frames(self):
-        """Test parsing of standard apriltag_ros frames."""
-        self.assertEqual(parse_tag_frame_id("tag36h11:5"), 5)
-        self.assertEqual(parse_tag_frame_id("tag36h11:3"), 3)
-        self.assertEqual(parse_tag_frame_id("tag36h11:0"), 0)
-        self.assertEqual(parse_tag_frame_id("tag36h11:105"), 105)
+    def test_aruco_frames_default_family(self):
+        """ArUco is the default family: aruco_14, aruco:14, etc."""
+        self.assertEqual(parse_tag_frame_id("aruco_14"), 14)
+        self.assertEqual(parse_tag_frame_id("aruco:14"), 14)
+        self.assertEqual(parse_tag_frame_id("aruco-0"), 0)
+        self.assertEqual(parse_tag_frame_id("aruco/49"), 49)
+
+    def test_apriltag_frames_need_family(self):
+        """AprilTag frames still parse when the family is set to tag36h11."""
+        self.assertEqual(parse_tag_frame_id("tag36h11:5", "tag36h11"), 5)
+        self.assertEqual(parse_tag_frame_id("tag36h11:105", "tag36h11"), 105)
+        self.assertIsNone(parse_tag_frame_id("tag36h11:5"))  # not ArUco
 
     def test_alternate_delimiters(self):
         """Test underscore, slash, and dash delimiters."""
-        self.assertEqual(parse_tag_frame_id("tag36h11_5"), 5)
-        self.assertEqual(parse_tag_frame_id("tag36h11-5"), 5)
-        self.assertEqual(parse_tag_frame_id("tag36h11/5"), 5)
+        self.assertEqual(parse_tag_frame_id("tag36h11_5", "tag36h11"), 5)
+        self.assertEqual(parse_tag_frame_id("tag36h11-5", "tag36h11"), 5)
+        self.assertEqual(parse_tag_frame_id("tag36h11/5", "tag36h11"), 5)
 
     def test_generic_tag_frames(self):
         """Test generic tag frame formats."""
@@ -54,6 +61,7 @@ class TestTagParsing(unittest.TestCase):
         self.assertIsNone(parse_tag_frame_id("base_link"))
         self.assertIsNone(parse_tag_frame_id("camera_link"))
         self.assertIsNone(parse_tag_frame_id("tag36h11_unknown"))
+        self.assertIsNone(parse_tag_frame_id("aruco_unknown"))
 
 
 class TestTagFilteringLogic(unittest.TestCase):
@@ -193,34 +201,74 @@ def quat_from_axes(x_axis, y_axis, z_axis):
     return ((m02 + m20) / s, (m12 + m21) / s, 0.25 * s, (m10 - m01) / s)
 
 
-def upright_tag_axes(heading):
+def upright_marker_axes(heading, z_axis):
     """
-    Axes of an upright wall-mounted AprilTag in the map frame.
-    AprilTag convention: x right along the face, y down, z INTO the tag.
-    `heading` = direction z points = direction the rover drives to approach.
+    Axes of an upright wall-mounted marker in the map frame.
+    `heading` = direction the rover drives to approach the marker head-on.
+      "in"  — AprilTag: x right along the face, y down, z INTO the marker.
+      "out" — OpenCV ArUco: x right along the face, y up, z OUT toward the viewer.
     """
     c, s = math.cos(heading), math.sin(heading)
-    z_axis = (c, s, 0.0)
-    y_axis = (0.0, 0.0, -1.0)
-    x_axis = (s, -c, 0.0)  # y x z = x for a right-handed frame
-    return x_axis, y_axis, z_axis
+    x_axis = (s, -c, 0.0)  # viewer's right
+    if z_axis == "in":
+        return x_axis, (0.0, 0.0, -1.0), (c, s, 0.0)
+    return x_axis, (0.0, 0.0, 1.0), (-c, -s, 0.0)
+
+
+def angle_diff(a, b):
+    return math.atan2(math.sin(a - b), math.cos(a - b))
 
 
 class TestTagApproachHeading(unittest.TestCase):
-    """The approach heading must come from the tag's z-axis, not its x-axis."""
+    """The approach heading must come from the marker's z-axis, per its convention."""
 
-    def test_upright_tag_headings(self):
-        for heading in [0.0, math.pi / 2, -math.pi / 2, 0.7, -2.5, math.pi - 0.01]:
-            qx, qy, qz, qw = quat_from_axes(*upright_tag_axes(heading))
-            got = tag_approach_heading(qx, qy, qz, qw)
+    HEADINGS = [0.0, math.pi / 2, -math.pi / 2, 0.7, -2.5, math.pi - 0.01]
+
+    def test_aruco_headings(self):
+        for heading in self.HEADINGS:
+            q = quat_from_axes(*upright_marker_axes(heading, "out"))
+            got = tag_approach_heading(*q, z_axis="out")
             self.assertIsNotNone(got)
-            diff = math.atan2(math.sin(got - heading), math.cos(got - heading))
-            self.assertAlmostEqual(diff, 0.0, places=5, msg=f"heading={heading}")
+            self.assertAlmostEqual(angle_diff(got, heading), 0.0, places=5, msg=f"heading={heading}")
+
+    def test_apriltag_headings(self):
+        for heading in self.HEADINGS:
+            q = quat_from_axes(*upright_marker_axes(heading, "in"))
+            got = tag_approach_heading(*q, z_axis="in")
+            self.assertIsNotNone(got)
+            self.assertAlmostEqual(angle_diff(got, heading), 0.0, places=5, msg=f"heading={heading}")
+
+    def test_wrong_convention_points_backwards(self):
+        """Mixing conventions sends the rover to the back of the marker — why the setting exists."""
+        q = quat_from_axes(*upright_marker_axes(0.0, "out"))
+        got = tag_approach_heading(*q, z_axis="in")
+        self.assertAlmostEqual(abs(angle_diff(got, 0.0)), math.pi, places=5)
 
     def test_flat_tag_returns_none(self):
-        """A tag lying flat (z-axis vertical) has no horizontal approach direction."""
-        self.assertIsNone(tag_approach_heading(0.0, 0.0, 0.0, 1.0))  # z up
-        self.assertIsNone(tag_approach_heading(1.0, 0.0, 0.0, 0.0))  # z down
+        """A marker lying flat (z-axis vertical) has no horizontal approach direction."""
+        for z_axis in ("out", "in"):
+            self.assertIsNone(tag_approach_heading(0.0, 0.0, 0.0, 1.0, z_axis=z_axis))  # z up
+            self.assertIsNone(tag_approach_heading(1.0, 0.0, 0.0, 0.0, z_axis=z_axis))  # z down
+
+    def test_invalid_convention_raises(self):
+        with self.assertRaises(ValueError):
+            tag_approach_heading(0.0, 0.0, 0.0, 1.0, z_axis="sideways")
+
+
+class TestDetectionFreshness(unittest.TestCase):
+    """TF never forgets a marker, so old sightings must be filtered out."""
+
+    def test_recent_detection_is_fresh(self):
+        self.assertTrue(is_detection_fresh(stamp_sec=99.5, now_sec=100.0, max_age_sec=1.0))
+
+    def test_old_detection_is_stale(self):
+        self.assertFalse(is_detection_fresh(stamp_sec=95.0, now_sec=100.0, max_age_sec=1.0))
+
+    def test_check_disabled(self):
+        self.assertTrue(is_detection_fresh(stamp_sec=0.5, now_sec=100.0, max_age_sec=0.0))
+
+    def test_static_transform_counts_as_fresh(self):
+        self.assertTrue(is_detection_fresh(stamp_sec=0.0, now_sec=100.0, max_age_sec=1.0))
 
 
 if __name__ == "__main__":

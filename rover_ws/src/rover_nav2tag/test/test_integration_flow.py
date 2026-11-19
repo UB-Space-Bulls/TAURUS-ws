@@ -158,9 +158,9 @@ class TestNav2TagIntegration(unittest.TestCase):
     def setUp(self):
         self.tf_buffer = MockTFBuffer()
         # Decoy Tag 3
-        self.tf_buffer.add_transform("tag36h11:3", x=2.0, y=1.0, z=0.0, yaw=0.0)
+        self.tf_buffer.add_transform("aruco_3", x=2.0, y=1.0, z=0.0, yaw=0.0)
         # Target Tag 5
-        self.tf_buffer.add_transform("tag36h11:5", x=6.0, y=3.0, z=0.0, yaw=0.0)
+        self.tf_buffer.add_transform("aruco_5", x=6.0, y=3.0, z=0.0, yaw=0.0)
 
         self.nav2_server = MockNav2ActionServer()
 
@@ -177,13 +177,13 @@ class TestNav2TagIntegration(unittest.TestCase):
 
         # Verify logs show Tag 3 was ignored and Tag 5 was matched
         logs = "\n".join(workflow.log_history)
-        self.assertIn("IGNORE: Tag 3 (frame tag36h11:3) != requested 5", logs)
-        self.assertIn("MATCH: Tag 5 found in frame tag36h11:5", logs)
+        self.assertIn("IGNORE: Tag 3 (frame aruco_3) != requested 5", logs)
+        self.assertIn("MATCH: Tag 5 found in frame aruco_5", logs)
 
         # Verify goal dispatched to Nav2
         self.assertEqual(len(self.nav2_server.goals_received), 1)
         goal = self.nav2_server.goals_received[0]
-        self.assertEqual(goal["tag_frame"], "tag36h11:5")
+        self.assertEqual(goal["tag_frame"], "aruco_5")
         self.assertEqual(goal["target_tag_id"], 5)
         self.assertAlmostEqual(goal["goal_x"], 5.5)  # 6.0 - 0.5 = 5.5
         self.assertAlmostEqual(goal["goal_y"], 3.0)
@@ -207,7 +207,7 @@ class TestNav2TagIntegration(unittest.TestCase):
         self.assertEqual(status, "GOAL_DISPATCHED")
         self.assertEqual(len(self.nav2_server.goals_received), 2)
         goal2 = self.nav2_server.goals_received[1]
-        self.assertEqual(goal2["tag_frame"], "tag36h11:3")
+        self.assertEqual(goal2["tag_frame"], "aruco_3")
         self.assertAlmostEqual(goal2["goal_x"], 1.5)  # 2.0 - 0.5 = 1.5
 
 

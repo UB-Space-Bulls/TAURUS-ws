@@ -1,6 +1,6 @@
-# rover_nav2tag — DEIMOS Autonomous AprilTag Navigation
+# rover_nav2tag — DEIMOS Autonomous Marker Navigation
 
-`rover_nav2tag` is the autonomous AprilTag targeting and navigation package for the Space Bulls DEIMOS Mars Rover (ROS 2 Jazzy).
+`rover_nav2tag` is the autonomous fiducial-marker targeting and navigation package for the Space Bulls DEIMOS Mars Rover (ROS 2 Jazzy). Defaults to **ArUco** markers (frames named `aruco_<id>`); AprilTag still works via settings.
 
 ---
 
@@ -36,12 +36,28 @@ Rover navigates and stops 0.5m in front of tag
 3. **0.5m Standoff Calculation**:
    - Uses the tag's heading in the `map` coordinate frame to back off exactly 0.5m from the tag.
    - Sets the rover's target orientation to face directly toward the tag.
+   - Which side is "the front" comes from the marker's z-axis, so `marker_z_axis` must match the detector (see Marker settings).
+
+6. **Stale-Marker Filtering**:
+   - TF keeps a marker's last pose forever, so markers not seen within `max_tag_age` seconds are ignored instead of chased.
 
 4. **Visual Debugging**:
    - Publishes the target goal to `/nav2tag/current_goal` (`geometry_msgs/msg/PoseStamped`) for inspection in RViz2.
 
 5. **Standalone Fake Tag Testing**:
-   - Includes `fake_tag_publisher` to test the node without waiting for the camera or AprilTag team.
+   - Includes `fake_tag_publisher` to test the node without waiting for the camera or perception team.
+
+---
+
+## Marker settings
+
+| Parameter | Default | Meaning |
+|---|---|---|
+| `tag_family` | `aruco` | Frame-name prefix: `aruco` matches `aruco_14` / `aruco:14`. Use `tag36h11` for AprilTag. |
+| `marker_z_axis` | `out` | `out` = z points out of the marker face (OpenCV ArUco). `in` = into the face (AprilTag). Wrong value → rover parks behind the marker. |
+| `max_tag_age` | `1.0` | Seconds; ignore markers not seen more recently than this. `0` disables. |
+
+**Needs from the detector:** one TF frame per visible marker (e.g. `<camera optical frame> → aruco_14`), with its full 3D pose. Pixel-only detections (`/detections`) aren't enough.
 
 ---
 

@@ -10,6 +10,7 @@ def generate_launch_description():
     target_tag_id = LaunchConfiguration("target_tag_id")
     stop_distance = LaunchConfiguration("stop_distance")
     tag_family = LaunchConfiguration("tag_family")
+    marker_z_axis = LaunchConfiguration("marker_z_axis")
     use_sim_time = LaunchConfiguration("use_sim_time")
     launch_fake_tags = LaunchConfiguration("launch_fake_tags")
 
@@ -27,8 +28,14 @@ def generate_launch_description():
 
     declare_tag_family = DeclareLaunchArgument(
         "tag_family",
-        default_value="tag36h11",
-        description="AprilTag family name / frame prefix",
+        default_value="aruco",
+        description="Marker frame prefix, e.g. aruco -> aruco_14 (use tag36h11 for AprilTag)",
+    )
+
+    declare_marker_z_axis = DeclareLaunchArgument(
+        "marker_z_axis",
+        default_value="out",
+        description="Marker z-axis convention: 'out' = OpenCV ArUco, 'in' = AprilTag",
     )
 
     declare_use_sim_time = DeclareLaunchArgument(
@@ -53,6 +60,7 @@ def generate_launch_description():
                 "target_tag_id": target_tag_id,
                 "stop_distance": stop_distance,
                 "tag_family": tag_family,
+                "marker_z_axis": marker_z_axis,
                 "use_sim_time": use_sim_time,
             }
         ],
@@ -63,6 +71,13 @@ def generate_launch_description():
         executable="fake_tag_publisher",
         name="fake_tag_publisher",
         output="screen",
+        parameters=[
+            {
+                "tag_family": tag_family,
+                "marker_z_axis": marker_z_axis,
+                "use_sim_time": use_sim_time,
+            }
+        ],
         condition=IfCondition(launch_fake_tags),
     )
 
@@ -71,6 +86,7 @@ def generate_launch_description():
             declare_target_tag_id,
             declare_stop_distance,
             declare_tag_family,
+            declare_marker_z_axis,
             declare_use_sim_time,
             declare_launch_fake_tags,
             nav2tag_node,
