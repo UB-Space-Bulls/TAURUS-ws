@@ -5,7 +5,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitution, PythonExpression
 from launch_ros.actions import Node
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
@@ -35,7 +35,19 @@ def generate_launch_description():
                 get_package_share_directory("ros_gz_sim"), "launch", "gz_sim.launch.py"
             )
         ),
-        launch_arguments={"gz_args": [world_file, " -r"]}.items(),
+        # headless:=true runs the server only (no GUI window) with offscreen
+        # rendering, so the GPU lidar still produces data in a display-less
+        # container or CI. Default false keeps the normal GUI behavior.
+        launch_arguments={
+            "gz_args": [
+                world_file,
+                " -r",
+                PythonExpression(
+                    ["' -s --headless-rendering' if '", LaunchConfiguration("headless"),
+                     "'.lower() == 'true' else ''"]
+                ),
+            ]
+        }.items(),
     )
 
     # use_sim_time is essential here: without it robot_state_publisher stamps
@@ -141,6 +153,7 @@ def generate_launch_description():
     return LaunchDescription(
         [
             DeclareLaunchArgument("world", default_value="second_world.sdf"),
+            DeclareLaunchArgument("headless", default_value="false"),
             gz_sim,
             robot_state_publisher,
             spawn_robot,
