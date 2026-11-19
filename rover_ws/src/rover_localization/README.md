@@ -1,5 +1,7 @@
 # FAST-LIO simulation diagnostic
 
+Point-LIO (Sprint 2 task L2) and its comparison with FAST-LIO: see [POINT_LIO.md](POINT_LIO.md).
+
 Inside the dev container, build and source the workspace:
 
 ```bash

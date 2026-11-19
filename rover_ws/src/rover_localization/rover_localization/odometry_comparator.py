@@ -25,6 +25,7 @@ class OdometryComparator(Node):
     def __init__(self):
         super().__init__('odometry_comparator')
         self.aligned = self.declare_parameter('body_alignment_verified', False).value
+        self.estimator_name = self.declare_parameter('estimator_name', 'FAST-LIO').value
         self.buffers = [deque(maxlen=1000), deque(maxlen=300)]
         self.arrivals = [None, None]
         self.latest = [None, None]
@@ -50,7 +51,7 @@ class OdometryComparator(Node):
         self.timer = self.create_timer(
             1.0, self.display, clock=Clock(clock_type=ClockType.STEADY_TIME))
         self.get_logger().info('Comparing synchronized relative motion; '
-                               'error sign = FAST-LIO minus Gazebo. '
+                               f'error sign = {self.estimator_name} minus Gazebo. '
                                'Generic LiDAR timing is unvalidated.')
 
     def imu(self, msg):
@@ -158,7 +159,7 @@ class OdometryComparator(Node):
                 warnings.append(f'{key}: missing/stale')
         if any(len(group) != 1 for group in ids):
             warnings.append('Expected exactly one publisher per odometry topic')
-        lines = [f'FAST-LIO diagnostic | sim clock {clock:.3f} s', self.status]
+        lines = [f'{self.estimator_name} diagnostic | sim clock {clock:.3f} s', self.status]
         valid = (not warnings and self.last_pair and self.references
                  and self.aligned and self.imu_frame == 'base_link')
         if valid:
@@ -170,7 +171,7 @@ class OdometryComparator(Node):
             g = relative(self.references[0], truth)
             e = relative(self.references[1], estimate)
             delta, norm, yaw = errors(g, e)
-            lines += ['Coordinate | Gazebo disp (m) | FAST-LIO disp (m) | Error (m)']
+            lines += [f'Coordinate | Gazebo disp (m) | {self.estimator_name:>8} disp (m) | Error (m)']
             for axis, a, b, d in zip('XYZ', g.position, e.position, delta):
                 lines.append(f'{axis:^10} | {a:15.4f} | {b:17.4f} | {d:9.4f}')
             lines += [f'3D error: {norm:.4f} m | yaw error: {yaw:+.3f} deg',

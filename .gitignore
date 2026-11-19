@@ -73,3 +73,6 @@ Thumbs.db
 rover_ws/src/fast_lio/
 rover_ws/src/livox_ros_driver2/
 rover_ws/src/point_lio/
+
+# Recorded rosbags (each is a directory with metadata.yaml + data files).
+rover_ws/bags/
