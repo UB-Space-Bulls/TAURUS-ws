@@ -321,8 +321,120 @@ rather than through git.
   (= `base_link`). The launch file checks this against the URDF.
 - `fov_degree: 360`, `scan_line: 32`, `det_range: 30` match the sim sensor.
 
-## 10. Not done yet
+## 10. Running on the real Unitree L1 (not tested yet)
+
+> **Status:** written from the driver's and Point-LIO's own code and configs,
+> but never run against real hardware. The L1 currently sends IMU data but no
+> scans (task H1). Update this section after the first real test.
+
+**How it changes from sim:** Point-LIO only listens to ROS 2 topics. In sim,
+Gazebo publishes them; on hardware, Unitree's driver does. The algorithm code
+stays the same. Only the topic names and a few hardware parameters change.
+
+| | Simulation | Real Unitree L1 |
+|---|---|---|
+| Who publishes the data | Gazebo → bridge → `lidar_cloud_filter` | Unitree driver `unitree_lidar_ros2` ([unilidar_sdk](https://github.com/unitreerobotics/unilidar_sdk)) |
+| Point-cloud topic | `/lidar/points_filtered` | `/unilidar/cloud` (frame `unilidar_lidar`) |
+| IMU topic | `/imu` | `/unilidar/imu` (frame `unilidar_imu`) |
+| Per-point `time` | Added as 0 by the filter | Sent by the driver (time since scan start) |
+| Use `lidar_cloud_filter`? | Yes | **No.** It would overwrite the real timing |
+| Launch | `rover_localization point_lio_test.launch.py` | `point_lio mapping_unilidar_l1.launch.py` (Point-LIO's own; already uses the topics above) |
+
+For the L2, use [unilidar_sdk2](https://github.com/unitreerobotics/unilidar_sdk2)
+and `mapping_unilidar_l2.launch.py` instead. The steps are the same.
+
+### Steps
+
+You need a **Linux** computer: Docker on macOS can't pass a USB device into
+a container. Per the Sprint 2 plan, don't use the Jetson (it's reserved for the ZED).
+
+**1. Plug in the L1 and find its serial port** (on the host):
+
+```bash
+ls /dev/ttyUSB*
+```
+
+The driver expects `/dev/ttyUSB0`. If nothing shows up, the cable or driver
+is the problem, not ROS.
+
+**2. Start the container with the device passed in.** `run-dev.sh` doesn't
+pass USB devices, so use this instead (from the repo root):
+
+```bash
+docker run -it --rm --net=host --name rover-dev-container -e DISPLAY="$DISPLAY" -v /tmp/.X11-unix:/tmp/.X11-unix -v "$(pwd)/rover_ws:/workspaces/rover_ws" --user "$(id -u):$(id -g)" --group-add dialout --device /dev/ttyUSB0 rover-dev
+```
+
+`--device` hands the serial port to the container. `--group-add dialout`
+lets your user open it (serial ports belong to the `dialout` group).
+
+**3. Get and build the Unitree driver** (inside the container, once):
+
+```bash
+cd /workspaces/rover_ws/src && git clone https://github.com/unitreerobotics/unilidar_sdk.git
+```
+```bash
+cd /workspaces/rover_ws && colcon build --symlink-install --packages-up-to unitree_lidar_ros2 point_lio && source install/setup.bash
+```
+
+`src/unilidar_sdk/` is git-ignored. It isn't in `third_party.repos` yet
+because it hasn't been verified to build in the dev image; add it once it has.
+
+**4. Start the driver and check the data** (terminal 1):
+
+```bash
+ros2 launch unitree_lidar_ros2 launch.py
+```
+
+In a second terminal (`docker exec -it rover-dev-container bash`):
+
+```bash
+ros2 topic hz /unilidar/cloud
+```
+```bash
+ros2 topic echo /unilidar/imu --once --field linear_acceleration
+```
+
+- `/unilidar/cloud` should arrive at roughly 10 Hz. **No messages = the H1
+  "no scans" problem**; Point-LIO can't help until that's fixed.
+- With the lidar sitting still and flat, the IMU's `z` is about **9.8** if it
+  reports m/s² (keep `acc_norm: 9.81`), or about **1.0** if it reports g
+  (set `acc_norm: 1.0`). Getting this wrong makes the pose shoot off at startup.
+
+**5. Run Point-LIO** (terminal 2; opens RViz):
+
+```bash
+ros2 launch point_lio mapping_unilidar_l1.launch.py
+```
+
+Keep the lidar **still for the first few seconds** while the log shows
+`IMU Initializing: ... 100.0 %`. Then carry it or drive slowly. Watch the
+map build in RViz.
+
+**6. Record the data** so it can be replayed into Point-LIO and FAST-LIO
+later without the hardware (terminal 3):
+
+```bash
+ros2 bag record -s mcap -o bags/l1_run1 /unilidar/cloud /unilidar/imu
+```
+
+### Parameters to re-check for the real sensor
+
+These live in `point_lio/config/unilidar_l1.yaml` (third-party, so copy it
+into `rover_localization/config/` before editing):
+
+| Parameter | Unitree default | Why check it |
+|---|---|---|
+| `acc_norm` | `9.81` | Must match the IMU unit (step 4) |
+| `extrinsic_T` / `extrinsic_R` | L1's built-in IMU → lidar offset | Correct for the L1 by itself. Point-LIO then tracks the **L1's IMU**, not `base_link`; mounting it on the rover needs a fixed transform to `base_link` (measure from CAD) |
+| `scan_line` | `18` | Must match the driver's `cloud_scan_num` |
+| `blind` | `0.5` m | Raise it if the map shows the rover's own body around the sensor |
+| `det_range` | `100` m | Lower it (e.g. 30) to save CPU outdoors |
+| `point_filter_num`, `filter_size_surf/map` | `1`, `0.1` | Same CPU trade-off as in sim (section 9); expect to raise them on the Orin |
+| `pcd_save_en` | `true` | Saves the whole map to `point_lio/PCD/` on exit; turn off for long runs |
+
+## 11. Not done yet
 
 - Demo recording (RViz screen capture) for the deliverable: needs a Linux
   machine with a display.
-- Real Unitree L1 data: blocked until the L1 delivers scans (task H1).
+- Real Unitree L1 test: section 10 is ready but blocked until the L1
+  delivers scans (task H1).
