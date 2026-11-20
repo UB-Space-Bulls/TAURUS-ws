@@ -1,0 +1,76 @@
+# Point-LIO (dfloreaa/point_lio_ros2) on the Gazebo Harmonic rover.
+# Started from point_lio/config/unilidar_l2.yaml; every change from it is
+# commented. Sensor facts (verified in sim): /imu 200 Hz in m/s^2, frame
+# base_link; /lidar/points 10 Hz, 720 x 32, frame lidar_link, mounted at
+# [0, 0, 0.25] m from base_link with identity rotation.
+/**:
+  ros__parameters:
+    use_sim_time: true
+    # Same frame names FAST-LIO uses, so odometry_comparator works for both.
+    odom_header_frame_id: camera_init
+    odom_child_frame_id: body
+    use_imu_as_input: false     # upstream L2 launch default
+    prop_at_freq_of_imu: true
+    check_satu: true
+    init_map_size: 10
+    point_filter_num: 3         # keep every 3rd point; upstream options are 1 or 3
+    space_down_sample: true
+    filter_size_surf: 0.5       # upstream default; 0.2 ran at 1.4 Hz (needs 10 Hz)
+    filter_size_map: 0.5
+    cube_side_length: 100.0
+    runtime_pos_log_enable: false
+    common:
+      # Cleaned by lidar_cloud_filter: inf points dropped, time = 0 added.
+      lid_topic: /lidar/points_filtered
+      imu_topic: /imu
+      con_frame: false
+      con_frame_num: 1
+      cut_frame: false
+      cut_frame_time_interval: 0.1
+      time_lag_imu_to_lidar: 0.0  # both come from one sim clock
+    preprocess:
+      lidar_type: 5             # Unilidar handler: reads the per-point time field
+      scan_line: 32             # sim lidar has 32 vertical rings
+      scan_rate: 10
+      timestamp_unit: 0         # seconds (all 0 here, see lidar_cloud_filter)
+      blind: 0.5                # drops ~2700 hits on the rover's own body
+    mapping:
+      imu_en: true
+      start_in_aggressive_motion: false
+      extrinsic_est_en: false   # mounting is exact in sim
+      imu_time_inte: 0.005      # 1 / 200 Hz
+      satu_acc: 30.0
+      satu_gyro: 35.0
+      acc_norm: 9.81            # Gazebo IMU reports m/s^2, not g
+      lidar_meas_cov: 0.01
+      acc_cov_output: 500.0
+      gyr_cov_output: 1000.0
+      b_acc_cov: 0.0001
+      b_gyr_cov: 0.0001
+      imu_meas_acc_cov: 0.1
+      imu_meas_omg_cov: 0.1
+      gyr_cov_input: 0.01
+      acc_cov_input: 0.1
+      plane_thr: 0.1
+      match_s: 81.0
+      fov_degree: 360.0         # full horizontal sweep (L2 config says 180)
+      det_range: 30.0           # sim lidar max range
+      gravity_align: true
+      gravity: [0.0, 0.0, -9.810]
+      gravity_init: [0.0, 0.0, -9.810]
+      # LiDAR pose in the IMU (= base_link) frame.
+      extrinsic_T: [0.0, 0.0, 0.25]
+      extrinsic_R: [1.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0,
+                    0.0, 0.0, 1.0]
+    odometry:
+      # false: stamp odometry at LiDAR scan end (10 Hz), like FAST-LIO, so the
+      # comparison pairs like with like.
+      publish_odometry_without_downsample: false
+    publish:
+      path_en: true
+      scan_publish_en: true
+      scan_bodyframe_pub_en: false
+    pcd_save:
+      pcd_save_en: false
+      interval: -1

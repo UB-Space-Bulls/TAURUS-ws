@@ -72,3 +72,8 @@ Thumbs.db
 # External ROS 2 source repositories. Avoid pushing whole repo.
 rover_ws/src/fast_lio/
 rover_ws/src/livox_ros_driver2/
+rover_ws/src/point_lio/
+rover_ws/src/unilidar_sdk/
+
+# Recorded rosbags (each is a directory with metadata.yaml + data files).
+rover_ws/bags/

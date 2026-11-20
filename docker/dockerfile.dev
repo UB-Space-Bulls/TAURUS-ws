@@ -84,6 +84,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-jazzy-tf2-ros \
     && rm -rf /var/lib/apt/lists/*
 
+# gz-transport's default partition is "<hostname>:<username>". run-dev.sh runs
+# as the host UID via --user, which has no /etc/passwd entry here, so the
+# username lookup breaks and Gazebo processes (server, ros_gz bridge/create,
+# `gz topic`) silently fail to discover each other -- the sim hangs on
+# "Requesting list of world names". A fixed partition sidesteps the lookup.
+ENV GZ_PARTITION=rover_dev
+
 # -----------------------------------------------------------------------------
 # Workspace
 # -----------------------------------------------------------------------------

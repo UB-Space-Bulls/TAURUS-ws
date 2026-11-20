@@ -8,3 +8,8 @@ repositories:
     type: git
     url: https://github.com/Ericsii/livox_ros_driver2.git
     version: 378d1c7c9d33ec44d0683aef885b6ed0cce9612c
+
+  src/point_lio:
+    type: git
+    url: https://github.com/dfloreaa/point_lio_ros2.git
+    version: a8e2d0d5090af97ead8dd4fac3d37cf3dbb33ff7
