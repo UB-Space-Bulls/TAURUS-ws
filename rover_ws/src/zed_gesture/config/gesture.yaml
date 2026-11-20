@@ -1,0 +1,39 @@
+zed_gesture_node:
+  ros__parameters:
+    # --- topics ---
+    intent_topic: /gesture/intent          # std_msgs/String JSON (the rover supervisor subscribes here)
+    status_topic: /gesture/status          # std_msgs/String JSON, every processed frame
+    debug_image_topic: /gesture/debug_image
+    publish_debug: true                    # only rendered when something subscribes
+    debug_scale: 0.5
+
+    # --- models / inference ---
+    model: yolo11n-pose.pt
+    detector: yolo11n.pt                   # only used with crop_pose
+    device: "0"                            # "cpu" for CPU
+    half: false
+    imgsz: 0                               # 0 = auto (960 long_range, 640 otherwise)
+    conf: 0.3
+    kp_conf: 0.5
+    long_range: true
+    crop_pose: false
+    pose_imgsz: 640
+    tracker: botsort.yaml
+
+    # --- geometry ---
+    up_angle: 45.0
+    up_elbow: 135.0
+    min_torso_px: 12.0
+    require_hips: false
+    shoulder_frame: false
+
+    # --- timing (seconds, measured on the ZED image header stamps) ---
+    hold: 0.7
+    release: 0.4
+    cooldown: 1.2
+    stop_hold: 0.35
+    max_gap: 0.25                          # a gap between processed frames longer than this disarms
+
+    # --- target ---
+    target_id: -1                          # -1 = none
+    auto_target: true                      # lock a lone person automatically
