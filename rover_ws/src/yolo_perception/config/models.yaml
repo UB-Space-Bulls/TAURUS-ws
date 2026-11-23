@@ -1,0 +1,44 @@
+# YOLO model profiles — one model per rover job.
+#
+# Why separate models instead of one big model? See README.md
+# ("Why one model per job"). Short version: letters need different training
+# settings (no horizontal flip, bigger image size) than craters/hammers, and
+# merging datasets that don't label each other's objects teaches the model
+# to ignore them.
+#
+# weights: file name looked up in weights_dir / $YOLO_WEIGHTS_DIR / ~/yolo_weights,
+#          or an absolute path.
+# classes: [] keeps every class the model knows; otherwise a list of class names.
+
+profiles:
+  terrain:
+    description: Lunar/Mars terrain — craters and rocks
+    weights: terrain_crater_rock.pt
+    imgsz: 640
+    conf: 0.35
+    iou: 0.45
+    classes: []
+
+  hammer:
+    description: Autonomy mission target — rock hammer (geologist's pick hammer)
+    weights: rock_hammer.pt
+    imgsz: 640
+    conf: 0.50
+    iou: 0.45
+    classes: []
+
+  keyboard:
+    description: Equipment Servicing — individual keyboard keys (a-z, 0-9)
+    weights: keyboard_letters.pt
+    imgsz: 960
+    conf: 0.40
+    iou: 0.30   # keys sit edge to edge; a lower IoU keeps NMS from merging neighbours
+    classes: []
+
+  coco:
+    description: Stock COCO model, for smoke tests without custom weights
+    weights: yolov8n.pt
+    imgsz: 640
+    conf: 0.45
+    iou: 0.45
+    classes: [person, backpack, bottle, cup, chair, laptop, cell phone, keyboard]

@@ -1,0 +1,53 @@
+# Where each model's training data comes from.
+#
+# Roboflow sources need a free API key:  export ROBOFLOW_API_KEY=xxxxx
+#   (roboflow.com -> Settings -> API Keys). Never commit the key.
+# version: a number, or "latest".
+# local sources: a folder exported in "YOLOv8" format (data.yaml + train/valid/test).
+#   Use this for OUR OWN photos — e.g. the actual competition rock hammer shot
+#   outdoors at 2-15 m. Those photos matter more than any online dataset.
+#
+# class_map: regex (case-insensitive, searched in the source class name) -> output class.
+#   Source classes that match nothing are DROPPED, never silently renamed.
+#
+# IMPORTANT — "missing label" rule: only merge sources that label the same objects.
+# If source A labels rocks and source B has rocks in its photos but doesn't label
+# them, the merged set teaches the model "rocks are background". That's why
+# the keyboard task keeps only keys labelled by EVERY source (classes: auto).
+
+terrain:
+  # best.pt (Nov 2026) was trained in Colab on Roboflow "Lunabotics-Computer-Vision" v3
+  # (classes Rock, crater). Add its workspace/project here once we find the link again.
+  classes: [crater, rock]
+  class_map:          # anchored so e.g. 'bedrock' / 'rocket' don't sneak in
+    '^craters?$': crater
+    '^rocks?$': rock
+  sources:
+    - {workspace: dsad-omghq, project: combined-mgeca, version: 2}
+
+hammer:
+  # One class. The model learns "hammer-like tool"; eval_by_folder.py then checks
+  # how it does on each hammer type (rock hammer, claw, ball-peen, sledge, mallet).
+  classes: [rock_hammer]
+  # Deliberately broad (any '...hammer...' / '...pick...' class). build_dataset.py prints
+  # the source->output mapping: read it and tighten this if a class looks wrong.
+  class_map:
+    'hammer|pick': rock_hammer
+  sources:
+    - {workspace: rover-object-detection, project: rock-hammer-7alb5, version: latest}
+    - {workspace: timlers-domain, project: rock-hammer, version: latest}
+    - {workspace: mt-ronnj, project: mt11_rock_pick-dataset, version: latest}
+    # Desert scenes like the competition site, but the object is an orange mallet
+    # (older URC target). Enable to add terrain variety; its "rock" class is dropped.
+    # - {workspace: orange-hammer, project: orange-hammer-detection-desert, version: latest}
+    # - {local: ~/datasets/our_rock_hammer_photos}
+
+keyboard:
+  # classes: auto = keys (a-z, 0-9) that EVERY source labels. List them by hand to override.
+  classes: auto
+  normalize_keys: true   # 'A', 'key_a', 'Key-A', 'a_key' -> 'a'
+  allowed_keys: 'abcdefghijklmnopqrstuvwxyz0123456789'
+  sources:
+    - {workspace: 1st-518jb, project: only_umrt_keyboard, version: latest}   # another URC team's keyboard set
+    - {workspace: tugraz-gkeui, project: keyboard-detection-1m02b, version: latest}
+    # - {local: ~/datasets/our_keyboard_photos}

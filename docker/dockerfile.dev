@@ -64,6 +64,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # -----------------------------------------------------------------------------
+# Perception — yolo_perception package (rover_ws/src/yolo_perception)
+# ROS-side deps only. The YOLO library itself (ultralytics, which pulls in
+# PyTorch, ~2 GB) is NOT baked in; install it inside the container when you
+# need it:  pip install --break-system-packages ultralytics
+# -----------------------------------------------------------------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-jazzy-vision-msgs \
+    ros-jazzy-cv-bridge \
+    ros-jazzy-foxglove-msgs \
+    python3-opencv \
+    python3-yaml \
+    && rm -rf /var/lib/apt/lists/*
+
+# -----------------------------------------------------------------------------
 # Workspace
 # -----------------------------------------------------------------------------
 ENV ROS_WS=/workspaces/rover_ws

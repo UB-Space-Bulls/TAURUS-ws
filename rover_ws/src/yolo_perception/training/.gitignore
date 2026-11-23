@@ -1,0 +1,6 @@
+# downloaded / merged datasets and training output stay local
+datasets/
+runs/
+*.pt
+*.onnx
+*.engine
