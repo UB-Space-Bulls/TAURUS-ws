@@ -6,6 +6,7 @@ zed_gesture_node:
     debug_image_topic: /gesture/debug_image
     publish_debug: true                    # only rendered when something subscribes
     debug_scale: 0.5
+    max_frame_age: 0.5                     # checked before/after inference and before each intent
 
     # --- models / inference ---
     model: yolo11n-pose.pt
@@ -15,7 +16,7 @@ zed_gesture_node:
     imgsz: 0                               # 0 = auto (960 long_range, 640 otherwise)
     conf: 0.3
     kp_conf: 0.5
-    long_range: true
+    long_range: false                     # default: one 640px pose pass; benchmark before enabling two passes
     crop_pose: false
     pose_imgsz: 640
     tracker: botsort.yaml
@@ -33,6 +34,7 @@ zed_gesture_node:
     cooldown: 1.2
     stop_hold: 0.35
     max_gap: 0.25                          # a gap between processed frames longer than this disarms
+                                          # last confirmed command remains in status; never reused as a pose
 
     # --- target ---
     target_id: -1                          # -1 = none

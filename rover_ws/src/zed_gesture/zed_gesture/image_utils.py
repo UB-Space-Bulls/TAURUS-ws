@@ -11,8 +11,12 @@ def image_to_bgr(msg):
         raise ValueError(f"unsupported image encoding '{msg.encoding}'")
     ch = _CHANNELS[enc]
     h, w = int(msg.height), int(msg.width)
+    if h <= 0 or w <= 0:
+        raise ValueError("image width and height must be positive")
     raw = np.frombuffer(msg.data, dtype=np.uint8)
     step = int(msg.step) or w * ch
+    if step < w * ch:
+        raise ValueError("image step smaller than width*channels")
     if raw.size < h * step:
         raise ValueError("image buffer smaller than height*step")
     arr = raw[: h * step].reshape(h, step)[:, : w * ch].reshape(h, w, ch)

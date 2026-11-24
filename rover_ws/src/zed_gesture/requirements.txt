@@ -1,0 +1,6 @@
+# Install torch/torchvision for the target CPU/CUDA/JetPack first (see README).
+# ROS Jazzy's Ubuntu OpenCV/matplotlib binaries use the NumPy 1.x ABI.
+numpy>=1.26,<2
+opencv-python>=4.7,<4.12
+ultralytics>=8.3,<9
+lap>=0.5.12

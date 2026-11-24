@@ -1,12 +1,12 @@
 # ZED 2 bringup for DEIMOS
 
-Starts a physical ZED 2 through the separately installed Stereolabs wrapper.
+Starts a physical ZED 2 through the Stereolabs wrapper submodule.
 Enables RGB, depth, a registered colored point cloud, IMU, and visual inertial
 odometry. Includes an RViz preset. Does not start SLAM or navigation.
 
-**Status: prepared and statically checked; hardware acceptance is pending.**
-No ROS installation, Jetson, camera, or graphical RViz session was available
-during preparation. Configured rates are starting points, not measurements.
+**Status: wrapper and project packages build with Jazzy and ZED SDK 5.5;
+physical camera/GPU acceptance is pending.** No camera or working GPU was
+available for the development checks. Configured rates remain starting points.
 
 ## Files and placement
 
@@ -24,7 +24,7 @@ Paths are relative to the DEIMOS repository root, not `rover_ws`.
 
 Suggested branch: `zed-setup/bringup`. This is a configuration-only `ament_cmake`
 package, so no `setup.py`, `setup.cfg`, or Python resource marker is needed.
-No wrapper source files are supplied or changed.
+Wrapper source lives in the pinned submodule; project settings stay here.
 
 ## Changes from Lyra
 
@@ -49,11 +49,15 @@ pattern, camera name `zed2`, and HD720 capture at 30 FPS. Changes:
 
 ## Check hardware and versions before installing
 
-The files target the **interface** of wrapper **v5.2.0**, commit
+The files originally targeted the **interface** of wrapper **v5.2.0**, commit
 `506e04757fdee442f055ddf280dfd36875732623`. Its README requires ZED SDK **5.2**
 and lists Jazzy on Ubuntu 24.04. This is a reproducible reference, not a claim
 that it is the latest release or a validated Jetson deployment. If using another
 release, verify its launch arguments, parameters, topics, and SDK requirements.
+The branch currently pins wrapper commit
+`b19902daf0136b6e841b5e415c2d01f425411c45` (5.5.0 development revision).
+Its launch interface and RGB topic have been checked against the project launch
+files; camera/GPU acceptance still has to run on the deployment computer.
 
 DEIMOS currently contains conflicting platform information:
 
@@ -125,18 +129,25 @@ any initial neural-model downloads/optimization before measuring steady-state ra
 
 ## Build and launch
 
-The wrapper and its dependencies must already be installed in the same Jazzy
-environment. This package neither installs nor modifies them. Source Jazzy and
-any separately built ZED workspace first in every terminal. An underlay is another
-ROS workspace whose installed packages this workspace uses.
+Populate the wrapper before building. A normal `git pull` does not initialize
+its submodule. From the DEIMOS repository root:
+
+```bash
+git submodule update --init --recursive -- rover_ws/src/zed-ros2-wrapper
+```
+
+Specify that path because this branch also contains unrelated Git links without
+submodule mappings, which can stop a blanket recursive update. Install the ZED
+SDK and the wrapper's system dependencies in the same Jazzy environment. The
+wrapper source alone does not install the camera SDK.
 
 ```bash
 source /opt/ros/jazzy/setup.bash
-# If ZED is in a separate workspace, source its install/setup.bash here.
 
 # From the DEIMOS repository root:
 cd rover_ws
-colcon build --symlink-install --packages-select rover_bringup
+rosdep install --from-paths src/zed-ros2-wrapper src/rover_bringup --ignore-src -r -y
+colcon build --symlink-install --packages-up-to zed_wrapper rover_bringup --cmake-args -DCMAKE_BUILD_TYPE=Release
 source install/setup.bash
 
 ros2 pkg prefix zed_wrapper
@@ -144,8 +155,9 @@ ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2 --show-args
 ros2 launch rover_bringup zed2.launch.py --show-args
 ```
 
-This selected-package build only installs the configuration package; it does not
-build or validate the wrapper. Check upstream declares `ros_params_override_path`,
+This build includes the wrapper and configuration package. For live human arm
+gesture input, see [`zed_gesture`](../zed_gesture/README.md).
+Check upstream declares `ros_params_override_path`,
 `publish_tf`, `publish_map_tf`, `publish_urdf`, `publish_imu_tf`, and `enable_ipc`.
 
 Use the same `RMW_IMPLEMENTATION` and `ROS_DOMAIN_ID` for camera, CLI, and RViz.

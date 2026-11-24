@@ -1,0 +1,7 @@
+# Optional two-pass profile. Parameters not listed use the node defaults, which
+# match gesture.yaml. Enable only after measuring processing gaps on the target GPU.
+zed_gesture_node:
+  ros__parameters:
+    long_range: true
+    imgsz: 960
+    pose_imgsz: 640

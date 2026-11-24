@@ -11,10 +11,11 @@
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
+  <exec_depend>zed_wrapper</exec_depend>
   <exec_depend>python3-numpy</exec_depend>
   <exec_depend>python3-opencv</exec_depend>
-  <!-- ultralytics + torch are pip-installed (see urc_gesture_test.py header) -->
-  <!-- zed_wrapper is only needed if you use launch_zed:=true -->
+  <!-- ultralytics + platform-specific torch are pip-installed; see README.md. -->
+  <test_depend>python3-pytest</test_depend>
 
   <export>
     <build_type>ament_python</build_type>

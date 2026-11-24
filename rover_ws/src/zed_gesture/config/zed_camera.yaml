@@ -1,0 +1,34 @@
+# Gesture-only live ZED profile. Preserve source pixels without allocating GPU
+# time to depth/tracking that this node does not consume. For rover depth/odom,
+# launch rover_bringup separately and use launch_zed:=false.
+/**:
+  ros__parameters:
+    general:
+      grab_resolution: 'HD720'
+      grab_frame_rate: 30
+      pub_resolution: 'NATIVE'             # 1280x720, including pixels used by target-crop refinement
+      pub_frame_rate: 15.0
+    video:
+      publish_rgb: true
+      enable_24bit_output: true            # BGR instead of BGRA; no alpha channel to transport
+      publish_left_right: false
+      publish_gray: false
+    depth:
+      depth_mode: 'NONE'
+      depth_stabilization: 0
+      publish_depth_map: false
+      publish_point_cloud: false
+    pos_tracking:
+      pos_tracking_enabled: false
+      publish_odom_pose: false
+    sensors:
+      publish_imu: false
+      publish_imu_raw: false
+    mapping:
+      mapping_enabled: false
+    object_detection:
+      od_enabled: false
+    body_tracking:
+      bt_enabled: false
+    debug:
+      disable_nitros: true
