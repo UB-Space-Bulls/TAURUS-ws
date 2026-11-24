@@ -26,7 +26,7 @@ if(BUILD_TESTING)
 endif()
 
 install(
-  DIRECTORY launch config rviz docs
+  DIRECTORY launch config rviz docs worlds
   DESTINATION share/${PROJECT_NAME}
 )
 install(FILES README.md README_FULL_STACK.md DESTINATION share/${PROJECT_NAME})
@@ -36,6 +36,8 @@ install(PROGRAMS
   scripts/check_terrain_integration.py
   scripts/terrain_velocity_gate.py
   scripts/test_rover_navigation.py
+  scripts/fastlio_sim_bridge.py
+  scripts/test_fastlio_navigation.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

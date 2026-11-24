@@ -106,6 +106,18 @@ class TerrainNode(Node):
         if not msg.header.frame_id:
             self.get_logger().warning('Cloud has no frame_id; dropped.', throttle_duration_sec=5.0)
             return
+        required_frames = []
+        if msg.header.frame_id != self.frame:
+            required_frames.append(msg.header.frame_id)
+        if self.rolling or self.self_filter_radius > 0:
+            required_frames.append(self.tracking_frame)
+        if any(not self.buffer.can_transform(self.frame, source, stamp)
+               for source in required_frames):
+            # TF and cloud callbacks can arrive in either order. Retry only this
+            # newest scan, at its original stamp; receive() may replace it. The
+            # age check above still bounds how long a missing TF can defer it.
+            self.latest = msg
+            return
         try:
             xyz = point_cloud2.read_points_numpy(
                 msg, field_names=('x', 'y', 'z'), skip_nans=True).reshape(-1, 3)

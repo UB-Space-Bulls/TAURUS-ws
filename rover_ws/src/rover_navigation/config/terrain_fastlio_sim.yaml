@@ -1,0 +1,22 @@
+terrain_geometry:
+  ros__parameters:
+    use_sim_time: true
+    input_topic: /cloud_registered
+    target_frame: odom
+    tracking_frame: base_link
+    rolling_window: true
+    # This profile starts stationary on the level obstacle-course floor.
+    level_frame_confirmed: true
+    body_ground_clearance: 0.2921
+    self_filter_radius: 0.7
+    processing_rate: 5.0
+    max_scan_age: 1.5
+    resolution: 0.4
+    width: 28
+    height: 28
+    origin_x: -5.6
+    origin_y: -5.6
+    min_z: -1.0
+    max_z: 3.0
+    seed_radius: 2.4
+    seed_tolerance: 0.15

@@ -29,10 +29,12 @@
   <exec_depend>nav_msgs</exec_depend>
   <exec_depend>terrain_geometry</exec_depend>
   <exec_depend>rover_description</exec_depend>
+  <exec_depend>fast_lio</exec_depend>
   <exec_depend>rover_swerve_controller</exec_depend>
   <exec_depend>lidar_terrain_description</exec_depend>
   <exec_depend>pointcloud_to_laserscan</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>tf2_msgs</exec_depend>
   <exec_depend>sensor_msgs_py</exec_depend>
   <exec_depend>lifecycle_msgs</exec_depend>
   <exec_depend>nav2_msgs</exec_depend>

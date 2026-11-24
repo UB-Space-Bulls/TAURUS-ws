@@ -3,7 +3,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler
-from launch.conditions import IfCondition
+from launch.conditions import IfCondition, UnlessCondition
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitution, PythonExpression
@@ -26,7 +26,11 @@ def generate_launch_description():
     robot_description = {
         "robot_description": ParameterValue(
             Command(["xacro ", xacro_file, ' terrain_lidar:=', LaunchConfiguration('terrain_lidar'),
-                     ' odometry_dimensions:=', LaunchConfiguration('odometry_dimensions')]),
+                     ' odometry_dimensions:=', LaunchConfiguration('odometry_dimensions'),
+                     ' imu:=', LaunchConfiguration('imu'),
+                     ' terrain_lidar_height:=', LaunchConfiguration('terrain_lidar_height'),
+                     ' terrain_lidar_horizontal_samples:=', LaunchConfiguration('terrain_lidar_horizontal_samples'),
+                     ' terrain_lidar_vertical_samples:=', LaunchConfiguration('terrain_lidar_vertical_samples')]),
             value_type=str
         )
     }
@@ -82,11 +86,23 @@ def generate_launch_description():
             # or inject a loop into /tf. The Pose_V on /odom_tf is remapped
             # onto /tf below so the TF tree gets its odom->base_link edge.
             "/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
-            "/odom_tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V",
         ],
-        remappings=[("/odom_tf", "/tf")],
+        remappings=[('/odom', PythonExpression([
+            "'/ground_truth/odom' if '", LaunchConfiguration('estimate_odometry'),
+            "' == 'true' else '/odom'"]))],
         output="screen",
     )
+
+    truth_tf_bridge = Node(
+        package='ros_gz_bridge', executable='parameter_bridge',
+        condition=UnlessCondition(LaunchConfiguration('estimate_odometry')),
+        arguments=['/odom_tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V'],
+        remappings=[('/odom_tf', '/tf')], output='screen')
+    imu_bridge = Node(
+        package='ros_gz_bridge', executable='parameter_bridge',
+        condition=IfCondition(LaunchConfiguration('imu')),
+        arguments=['/rover/imu@sensor_msgs/msg/Imu[gz.msgs.IMU'],
+        parameters=[{'use_sim_time': True}], output='screen')
 
     # /controller_manager doesn't exist until gz_ros2_control's plugin
     # finishes initializing *inside Gazebo*, which only happens once
@@ -153,6 +169,11 @@ def generate_launch_description():
             DeclareLaunchArgument('gui', default_value='true', choices=['true', 'false']),
             DeclareLaunchArgument('headless_rendering', default_value='false', choices=['true', 'false']),
             DeclareLaunchArgument('terrain_lidar', default_value='false', choices=['true', 'false']),
+            DeclareLaunchArgument('terrain_lidar_height', default_value='1.0'),
+            DeclareLaunchArgument('terrain_lidar_horizontal_samples', default_value='720'),
+            DeclareLaunchArgument('terrain_lidar_vertical_samples', default_value='64'),
+            DeclareLaunchArgument('imu', default_value='false', choices=['true', 'false']),
+            DeclareLaunchArgument('estimate_odometry', default_value='false', choices=['true', 'false']),
             DeclareLaunchArgument('odometry_dimensions', default_value='2', choices=['2', '3']),
             DeclareLaunchArgument('spawn_x', default_value='0.0'),
             DeclareLaunchArgument('spawn_y', default_value='0.0'),
@@ -161,6 +182,8 @@ def generate_launch_description():
             robot_state_publisher,
             spawn_robot,
             gz_bridge,
+            truth_tf_bridge,
+            imu_bridge,
             cloud_bridge,
             delay_joint_state_broadcaster_after_spawn,
             delay_module_controllers_after_joint_state_broadcaster,

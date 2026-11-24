@@ -30,6 +30,7 @@ def gate():
     cls = runpy.run_path(str(script))['TerrainVelocityGate']
     node = object.__new__(cls)
     node.valid = True
+    node.require_localization = False
     node.health_time = node.command_time = 10.0
     node.command = Twist(linear=Vector3(x=0.2))
     output = []
@@ -61,5 +62,23 @@ def test_missing_command_stops_even_with_healthy_terrain():
     node, output = gate()
     node.health_time = 11.0
     with patch('time.monotonic', return_value=11.1):
+        node.tick()
+    assert output[-1] == Twist()
+
+
+def test_localization_loss_stops_even_with_fresh_terrain():
+    node, output = gate()
+    node.require_localization = True
+    node.localization_valid = False
+    node.localization_time = 10.0
+    with patch('time.monotonic', return_value=10.1):
+        node.tick()
+    assert output[-1] == Twist()
+    node.localization_valid = True
+    with patch('time.monotonic', return_value=10.1):
+        node.tick()
+    assert output[-1].linear.x == 0.2
+    node.command_time = node.health_time = 12.0
+    with patch('time.monotonic', return_value=12.1):
         node.tick()
     assert output[-1] == Twist()

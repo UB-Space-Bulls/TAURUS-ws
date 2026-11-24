@@ -2,6 +2,10 @@
 <robot name="rover" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:arg name="terrain_lidar" default="false"/>
   <xacro:arg name="odometry_dimensions" default="2"/>
+  <xacro:arg name="imu" default="false"/>
+  <xacro:arg name="terrain_lidar_height" default="1.0"/>
+  <xacro:arg name="terrain_lidar_horizontal_samples" default="720"/>
+  <xacro:arg name="terrain_lidar_vertical_samples" default="64"/>
 
   <!--
     Chassis geometry (chassis_link + 4x swerve module meshes below) comes
@@ -450,7 +454,7 @@
     <joint name="terrain_lidar_joint" type="fixed">
       <parent link="base_link"/>
       <child link="terrain_lidar_link"/>
-      <origin xyz="0 0 1.0" rpy="0 0 0"/>
+      <origin xyz="0 0 $(arg terrain_lidar_height)" rpy="0 0 0"/>
     </joint>
     <link name="terrain_lidar_link">
       <inertial>
@@ -467,11 +471,21 @@
         <update_rate>5</update_rate>
         <lidar>
           <scan>
-            <horizontal><samples>720</samples><resolution>1</resolution><min_angle>-3.141592653589793</min_angle><max_angle>3.141592653589793</max_angle></horizontal>
-            <vertical><samples>64</samples><resolution>1</resolution><min_angle>-1.5707</min_angle><max_angle>0.261799</max_angle></vertical>
+            <horizontal><samples>$(arg terrain_lidar_horizontal_samples)</samples><resolution>1</resolution><min_angle>-3.141592653589793</min_angle><max_angle>3.141592653589793</max_angle></horizontal>
+            <vertical><samples>$(arg terrain_lidar_vertical_samples)</samples><resolution>1</resolution><min_angle>-1.5707</min_angle><max_angle>0.261799</max_angle></vertical>
           </scan>
           <range><min>0.1</min><max>30</max><resolution>0.01</resolution></range>
         </lidar>
+      </sensor>
+    </gazebo>
+  </xacro:if>
+
+  <!-- FAST-LIO body is this IMU origin, coincident with base_link in simulation. -->
+  <xacro:if value="$(arg imu)">
+    <gazebo reference="base_link">
+      <sensor name="navigation_imu" type="imu">
+        <topic>/rover/imu</topic><gz_frame_id>base_link</gz_frame_id>
+        <always_on>true</always_on><update_rate>200</update_rate>
       </sensor>
     </gazebo>
   </xacro:if>

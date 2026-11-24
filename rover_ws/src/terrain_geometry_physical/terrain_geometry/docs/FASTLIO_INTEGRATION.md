@@ -1,5 +1,12 @@
 # FAST-LIO integration (v0.6.0)
 
+In the current rover workspace, the complete level-course simulation is started
+with `ros2 launch rover_navigation fastlio_obstacle.launch.py`. It connects
+FAST-LIO, registered-scan terrain processing, both Nav2 costmaps and rover motion,
+and includes a physical obstacle. See the
+[full-stack commands and frame contract](../../../rover_navigation/README_FULL_STACK.md#fast-lio-and-obstacle-avoidance).
+The older branch-specific setup below describes the standalone adapter interface.
+
 Reviewed against DEIMOS `localization/fast-lio` commit
 `7295ce36432453ebddb38e30611daf3bf9fc75f1` (13 November 2026), and
 `perception/terrain-geometry` commit `8f897ade3b6f0ca8a8af60493655243aeeeabdcc`.

@@ -10,6 +10,170 @@ Use `terrain_rover.launch.py` for this test. The earlier
 `terrain_sim.launch.py` uses a synthetic cost patch. Neither is the full moving
 test. Start this combined launch by itself in its ROS domain/Gazebo partition.
 
+## FAST-LIO and obstacle avoidance
+
+Use `fastlio_obstacle.launch.py` to test estimated navigation through the full
+perception/control chain. This is a separate, level test course with a physical
+0.8 m orange box centered at `(2, 0)` and a test goal at `(4, 0)`. The surrounding
+walls provide scan-matching structure. The box has collision and LiDAR geometry;
+its cost is obtained from sensor observations rather than injected into a map.
+This mode does not use the terrain STL.
+
+```mermaid
+flowchart LR
+  S[Gazebo 3D LiDAR + IMU] --> G[Level-start gate + rover return filter]
+  G --> F[FAST-LIO]
+  F --> O[Estimated odometry and TF]
+  F --> T[Registered scan → terrain geometry]
+  T --> C[Terrain cost grid → both Nav2 costmaps]
+  L[Gazebo 2D scan] --> C
+  C --> N[Nav2 planner and controller]
+  O --> N
+  N --> V[Terrain + localization validity gate]
+  V --> W[Swerve steering and wheel controllers]
+```
+
+Build with the pinned FAST-LIO repositories already imported (see the workspace
+`FAST_LIO_SETUP.md`). This selection does not build unrelated camera packages:
+
+```bash
+cd ~/DEIMOS-ws/rover_ws
+source /opt/ros/jazzy/setup.bash
+PYTHONNOUSERSITE=1 CMAKE_BUILD_PARALLEL_LEVEL=2 MAKEFLAGS=-j2 \
+  colcon build --packages-up-to rover_navigation --executor sequential \
+  --cmake-args -DCMAKE_BUILD_TYPE=Release -DPython3_EXECUTABLE=/usr/bin/python3
+source install/setup.bash
+```
+
+In each terminal, source the same workspace and use the same domain/partition:
+
+```bash
+export ROS_DOMAIN_ID=194
+export GZ_PARTITION=fastlio_obstacle_demo
+export PYTHONNOUSERSITE=1
+```
+
+Terminal 1 opens Gazebo and RViz:
+
+```bash
+ros2 launch rover_navigation fastlio_obstacle.launch.py
+```
+
+Wait for `Level stationary start confirmed` and FAST-LIO initialization. The
+bridge requires one second of stationary, level IMU measurements before passing
+sensor data to the estimator, avoiding initialization during the initial drop.
+An incomplete TF tree during this startup interval is expected. A single
+combined launch owns the simulator, sensors, estimator and controllers.
+
+For headless execution, append `gui:=false rviz:=false headless_rendering:=true`.
+Rendering is still required for the simulated LiDAR.
+
+Terminal 2 inspects the pipeline without commanding motion:
+
+```bash
+ros2 run rover_navigation test_fastlio_navigation.py
+```
+
+To navigate around the box and then verify the paused-sensor stop/recovery:
+
+```bash
+ros2 run rover_navigation test_fastlio_navigation.py \
+  --navigate --pause-test --report /tmp/fastlio_obstacle_validation.json
+```
+
+The navigation test explicitly commands movement. It checks the raw 2D/3D
+scans, registered cloud, source timestamps, localization validity, all three
+cost grids, TF publishers, successful Nav2 action, actual detour, box clearance,
+goal error and displacement agreement. Gazebo ground truth is read solely by
+this diagnostic. Alternatively use RViz's **Nav2 Goal** tool to select a visible
+free point behind/beside the box. A running launch alone does not move the rover.
+Run the automatic test from a fresh course start; restart the launch before
+repeating it after manual driving or a completed navigation goal.
+
+### Frames, timing and limitations
+
+The navigation frame chain is:
+
+```text
+terrain_map --known level start (+0.2921 m Z)--> odom
+odom --identity--> camera_init --FAST-LIO estimate--> body
+body --verified coincident IMU/base origin--> base_link --URDF--> sensors/wheels
+```
+
+`/odom` has one publisher, `fastlio_sim_bridge`, which routes `/Odometry` poses
+into the aliased `odom/base_link` frames and derives planar twist from successive
+estimated poses. FAST-LIO owns the sole moving `camera_init -> body` transform.
+The Gazebo pose is remapped to `/ground_truth/odom`; its TF is not bridged into
+navigation. There is no fallback from missing FAST-LIO output to ground truth.
+
+The 3D scanner is 2 m above `base_link`, matching `fastlio_sim.yaml` extrinsics.
+It uses 360 horizontal by 128 vertical samples at 5 Hz. Its clouds are
+instantaneous Gazebo snapshots, so the simulation uses the generic type-5
+handler. This is not the physical L1's timed type-2 configuration. Points within
+the rover's 0.7 m XY envelope are removed before scan matching, retaining all
+other point fields and the original timestamp.
+
+Terrain consumes the current `/cloud_registered` scan, transformed into level
+`odom` at its exact stamp. It uses an 11.2 m square window with 0.4 m cells and
+keeps unknown space unknown. Dense registered points preserve sufficient local
+ground support. The node retains only the newest scan while waiting for matching
+TF and still rejects it when stale. Both Nav2 costmaps combine this terrain
+layer with the 2D obstacle layer and inflation. The existing occupied-footprint
+clearing assumption applies on this controlled support surface.
+
+In this profile the collision monitor retains collision checking and uses the
+scanner's fixed body mounting (`base_shift_correction:=false`). Its optional
+current-time motion correction cannot assume a current-time pose from a
+LiDAR-rate estimator. The controller enables in-place heading alignment so it
+can finish a goal after following a curved detour. Sensor freshness, localization
+validity, terrain validity and wheel command timeouts remain enforced.
+
+Pausing sensors or losing the estimator invalidates navigation output; a
+timestamp regression or a pose jump over 1 m latches the localization gate
+closed until this test is restarted. This is a simulation integration test,
+not a physical localization accuracy certification. Real L1 timing, calibration,
+mounting and a gravity-aligned navigation frame still need hardware validation.
+
+For software regressions after sourcing the workspace:
+
+```bash
+PYTHONPATH="$PWD/src/terrain_geometry_physical/terrain_geometry:$PYTHONPATH" \
+  python3 -m pytest src/rover_navigation/test \
+  src/terrain_geometry_physical/terrain_geometry/test -q
+```
+
+If Gazebo reports a missing package that no longer exists in `src`, inspect
+`install/<package>/share/ament_index/resource_index/packages/<package>` for a
+dangling symlink. A stale generated package-index entry can break Gazebo's path
+discovery even when the missing package is unrelated to this launch.
+
+### Validation recorded on 24 November 2026
+
+- All required simulation/estimator/navigation packages built successfully;
+  73 navigation and terrain regression tests passed.
+- A fresh course run completed `NavigateToPose` with status SUCCEEDED and
+  error code 0. The physical box was detected at about 1.60 m by `/scan` and
+  marked lethal in the terrain grid and both Nav2 costmaps.
+- Independent Gazebo diagnostics measured a 2.05 m lateral detour and a 0.188 m
+  final goal error. Minimum body-origin distance to the box surface was 1.535 m;
+  this is a center-to-box measurement, not a measured chassis-edge clearance.
+  Estimated and actual net displacements differed by about 1.8 mm in this run.
+- Paused sensor data made terrain unknown, invalidated localization, and blocked
+  fresh test velocity commands at the final gate and wheels. Both validity
+  streams recovered after simulation resumed.
+- RViz started with OpenGL 4.6 and loaded the live costmap. The test reported
+  exactly one estimated `/odom` publisher and only the expected FAST-LIO and
+  robot-state TF publishers. The moving TF edge was `camera_init -> body`.
+
+Workspace artifacts: `log/fastlio_obstacle_validation.json`,
+`log/fastlio_obstacle_launch.log`, `log/fastlio_obstacle_check.log`,
+`log/fastlio_obstacle_rviz.log` and `log/fastlio_obstacle_trajectory.png`.
+The test is a bounded, slow simulation demonstration, not a general odometry
+accuracy result. This host still logged processing-time warnings, occasional
+scan-filter drops and a freshness-related planner retry. The conservative
+unknown-space and stop policies remained active; this run does not establish
+every scan arriving or a guaranteed real-time processing rate.
+
 ## 1. Dependencies and build
 
 ROS 2 Jazzy, Gazebo Harmonic, and a working Ogre2 rendering context are required.

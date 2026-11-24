@@ -64,21 +64,24 @@ accuracy.
 | --- | --- |
 | FAST-LIO estimator and Livox dependency | Imported at the exact revisions in the branch's `third_party.repos`. |
 | `rover_localization` | Not imported. Its `fast_lio_test.launch.py`, Gazebo config, comparator and RViz setup are not part of the current launch. |
-| `rover_description` | Existing terrain/navigation version retained. The linked branch's sensor/bridge changes were not imported. |
+| `rover_description` | Terrain/navigation version retained, with optional simulated IMU, configurable 3D scanner, and estimated-odometry bridge mode added for the integrated course. |
 
 The branch's localization test includes `rover_description/gazebo.launch.py`
 and FAST-LIO's `mapping.launch.py`, configured for `/lidar/points` and `/imu`.
 Its rover description supplies a 32-layer simulated LiDAR and a 200 Hz IMU.
-The current terrain rover instead supplies `/rover/lidar/points` plus `/scan`
-and has no simulated IMU. Copying the branch's launch alone would therefore
-leave FAST-LIO without its expected inputs.
+The default STL terrain rover supplies `/rover/lidar/points` plus `/scan`.
+The new FAST-LIO obstacle course additionally enables `/rover/imu`, and passes
+the filtered cloud and IMU through the level-start gate to the estimator.
+The branch's diagnostic launch is not required by the integrated course.
 
 ## What remains to connect
 
-The current `terrain_rover.launch.py` still uses Gazebo ground-truth odometry.
-It does not start FAST-LIO. The current rover model also needs an appropriate
-IMU source for a complete LiDAR-inertial test; adding the estimator alone is
-insufficient. The localization branch's bringup package has not been imported.
+`terrain_rover.launch.py` remains the STL test using Gazebo odometry.
+`rover_navigation/fastlio_obstacle.launch.py` runs the level obstacle course with
+actual FAST-LIO pose/TF feeding terrain geometry, both Nav2 costmaps and rover
+control. Ground truth is isolated to `/ground_truth/odom` for diagnostics.
+See [the full-stack test guide](src/rover_navigation/README_FULL_STACK.md#fast-lio-and-obstacle-avoidance)
+for launch, navigation, stop/recovery checks and frame assumptions.
 
 FAST-LIO's upstream default launch/config targets Livox hardware. For the L1,
 the optional `unitree_l1_driver/l1_fastlio.launch.py` uses the supplied L1

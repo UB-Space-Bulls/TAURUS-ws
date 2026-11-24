@@ -9,9 +9,11 @@ import pytest
 
 
 @pytest.mark.parametrize('enabled', ['true', 'false'])
-def test_outer_viewer_setting_survives_child_launch(enabled, tmp_path, monkeypatch):
+@pytest.mark.parametrize('launch_name,mesh', [
+    ('terrain_rover.launch.py', True), ('fastlio_obstacle.launch.py', False)])
+def test_outer_viewer_setting_survives_child_launch(enabled, launch_name, mesh, tmp_path, monkeypatch):
     monkeypatch.setenv('ROS_LOG_DIR', str(tmp_path))
-    path = Path(__file__).parents[1] / 'launch/terrain_rover.launch.py'
+    path = Path(__file__).parents[1] / 'launch' / launch_name
     launch = runpy.run_path(str(path))['generate_launch_description']()
     context = LaunchContext()
     context.launch_configurations.update(rviz=enabled, gui='false', headless_rendering='true')
@@ -33,4 +35,4 @@ def test_outer_viewer_setting_survives_child_launch(enabled, tmp_path, monkeypat
     assert context.launch_configurations['rviz'] == enabled
     assert nodes.count(('rviz2', 'rviz2')) == (1 if enabled == 'true' else 0)
     assert nodes.count(('lidar_terrain_description', 'mesh_marker')) == (
-        1 if enabled == 'true' else 0)
+        1 if enabled == 'true' and mesh else 0)

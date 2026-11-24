@@ -6,6 +6,12 @@ geometry + both Nav2 costmaps + navigation** test, start with
 launch, a test that drives the rover and completes a Nav2 goal, RViz setup,
 dependency checks, and stop/recovery tests.
 
+For **FAST-LIO estimated navigation around a physical obstacle**, run
+`ros2 launch rover_navigation fastlio_obstacle.launch.py`. The
+[FAST-LIO course guide](README_FULL_STACK.md#fast-lio-and-obstacle-avoidance)
+includes the automatic detour/goal test and sensor-pause stop check. Ground
+truth is diagnostic-only in this mode; the older STL launch uses Gazebo odometry.
+
 For the area STL with rainbow terrain geometry, use
 `ros2 launch rover_navigation terrain_rover.launch.py rviz_view:=terrain`.
 An existing RViz window can load `config/terrain_inspection.rviz` without
